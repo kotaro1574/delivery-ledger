@@ -1,0 +1,84 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: "Zen Kaku Gothic New", "Hiragino Sans", "Yu Gothic", sans-serif;
+  --font-mono: "Spline Sans Mono", "SFMono-Regular", Consolas, monospace;
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+:root {
+  --radius: 0.75rem;
+  --paper: #f3efe6;
+  --ledger-card: #fbf9f3;
+  --ledger-ink: #22201a;
+  --ledger-soft: #76705f;
+  --ledger-line: #e2dccd;
+  --ledger-income: #2f6b4f;
+  --ledger-expense: #a8543a;
+  --background: #f3efe6;
+  --foreground: #22201a;
+  --card: #fbf9f3;
+  --card-foreground: #22201a;
+  --popover: #fbf9f3;
+  --popover-foreground: #22201a;
+  --primary: #22201a;
+  --primary-foreground: #fbf9f3;
+  --secondary: #ece7da;
+  --secondary-foreground: #22201a;
+  --muted: #ece7da;
+  --muted-foreground: #76705f;
+  --accent: #fffdf7;
+  --accent-foreground: #22201a;
+  --destructive: #a8543a;
+  --border: #e2dccd;
+  --input: #e2dccd;
+  --ring: #cdbf9e;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    min-height: 100vh;
+    background-image: radial-gradient(
+      circle at 1px 1px,
+      rgb(0 0 0 / 2.5%) 1px,
+      transparent 0
+    );
+    background-size: 22px 22px;
+  }
+
+  button {
+    cursor: pointer;
+  }
+
+  button:disabled {
+    cursor: default;
+  }
+}

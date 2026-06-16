@@ -1,0 +1,60 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "delivery-ledger",
+  "main": "worker.ts",
+  "compatibility_date": "2026-06-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "delivery-ledger-db",
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "drizzle/migrations"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "RECEIPTS",
+      "bucket_name": "delivery-ledger-receipts"
+    }
+  ],
+  "triggers": {
+    "crons": ["0 15 1 * *", "0 15 5 1 *"]
+  },
+  "vars": {
+    "BETTER_AUTH_URL": "https://delivery-ledger.example.workers.dev",
+    "R2_BUCKET_NAME": "delivery-ledger-receipts",
+    "UPLOAD_MODE": "presigned",
+    "GEMINI_OCR_MODEL": "gemini-3.1-flash-lite"
+  },
+  "env": {
+    "dev": {
+      "name": "delivery-ledger-dev",
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "delivery-ledger-db",
+          "database_id": "00000000-0000-0000-0000-000000000000",
+          "migrations_dir": "drizzle/migrations"
+        }
+      ],
+      "r2_buckets": [
+        {
+          "binding": "RECEIPTS",
+          "bucket_name": "delivery-ledger-receipts-dev"
+        }
+      ],
+      "vars": {
+        "BETTER_AUTH_URL": "http://localhost:8787",
+        "BETTER_AUTH_SECRET": "local-development-secret-change-before-production",
+        "R2_BUCKET_NAME": "delivery-ledger-receipts-dev",
+        "UPLOAD_MODE": "local",
+        "GEMINI_OCR_MODEL": "gemini-3.1-flash-lite"
+      }
+    }
+  }
+}
