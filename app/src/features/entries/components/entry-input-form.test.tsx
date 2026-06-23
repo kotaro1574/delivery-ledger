@@ -84,6 +84,16 @@ describe("EntryInputForm", () => {
     expect(screen.getByLabelText("分")).toHaveValue("");
   });
 
+  it("件数とオンライン時間の入力枠を同じ高さで表示する", () => {
+    render(<EntryInputForm />);
+
+    expect(screen.getByLabelText("件数").parentElement).toHaveClass("h-12");
+    expect(screen.getByLabelText("時間").parentElement).toHaveClass("h-12");
+    expect(screen.getByLabelText("分").parentElement).toHaveClass("h-12");
+    expect(screen.getByText("時間")).toHaveClass("whitespace-nowrap");
+    expect(screen.getByText("分")).toHaveClass("whitespace-nowrap");
+  });
+
   it("収入保存後にトップへ遷移する", async () => {
     const fetchMock = vi.fn(
       async (_input: RequestInfo | URL, _init?: RequestInit) =>

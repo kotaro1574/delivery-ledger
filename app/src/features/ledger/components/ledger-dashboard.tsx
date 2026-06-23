@@ -19,6 +19,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { expenseCategories } from "@/features/entries/utils/journal-preview";
+import { DailyTrendCard } from "@/features/ledger/components/daily-trend-card";
 import { cn } from "@/lib/utils";
 
 type EditForm = {
@@ -111,6 +112,8 @@ export function LedgerDashboard({
     1,
     ...summary.byCategory.map((item) => item.amount),
   );
+  const privateExpense = Math.max(0, summary.paidExpense - summary.expense);
+  const showExpenseBreakdown = summary.paidExpense > 0 && privateExpense > 0;
 
   const openEdit = (entry: EntriesModel.Item) => {
     setEditing(entry);
@@ -249,11 +252,17 @@ export function LedgerDashboard({
         </div>
         <div className="bg-card p-5">
           <div className="mb-2 text-xs tracking-widest text-muted-foreground">
-            経費
+            経費（事業分）
           </div>
           <div className="font-mono text-2xl font-bold text-[var(--ledger-expense)]">
             {yen(summary.expense)}
           </div>
+          {showExpenseBreakdown ? (
+            <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs font-bold text-muted-foreground">
+              <span>支払総額 {yen(summary.paidExpense)}</span>
+              <span>私用分 {yen(privateExpense)}</span>
+            </div>
+          ) : null}
         </div>
         <div className="bg-[#fffdf7] p-5">
           <div className="mb-2 text-xs tracking-widest text-muted-foreground">
@@ -265,9 +274,11 @@ export function LedgerDashboard({
         </div>
       </section>
 
+      <DailyTrendCard entries={entries} month={month} />
+
       <section>
         <div className="mb-3 text-sm font-bold tracking-[0.2em] text-muted-foreground">
-          経費内訳（科目別）
+          経費内訳（事業分）
         </div>
         <Card className="overflow-hidden border-border bg-card p-0">
           {summary.byCategory.length > 0 ? (
@@ -342,6 +353,15 @@ export function LedgerDashboard({
                   <span className="block text-xs tracking-wide text-muted-foreground">
                     {entry.category}
                   </span>
+                  {entry.kind === "expense" &&
+                  entry.businessAmount !== null &&
+                  entry.privateAmount !== null &&
+                  entry.privateAmount > 0 ? (
+                    <span className="mt-1 block text-xs font-bold text-muted-foreground">
+                      事業分 {yen(entry.businessAmount)} / 私用分{" "}
+                      {yen(entry.privateAmount)}
+                    </span>
+                  ) : null}
                 </span>
                 <span
                   className={

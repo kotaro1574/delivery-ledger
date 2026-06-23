@@ -35,6 +35,8 @@ describe("EntriesModel", () => {
         deliveries: 9,
         onlineMinutes: 315,
         receiptKey: null,
+        businessAmount: null,
+        privateAmount: null,
       }),
     ).toEqual({
       id: "entry-1",
@@ -47,6 +49,40 @@ describe("EntriesModel", () => {
       deliveries: 9,
       onlineMinutes: 315,
       receiptKey: null,
+      businessAmount: null,
+      privateAmount: null,
+    });
+  });
+
+  it("一覧Itemに経費の事業分と私用分を含める", () => {
+    expect(
+      EntriesModel.Item.parse({
+        id: "entry-2",
+        date: "2026-06-09",
+        kind: "expense",
+        category: "車両費",
+        categoryCode: "601",
+        description: "SOLATOガソリン",
+        amount: 705,
+        deliveries: null,
+        onlineMinutes: null,
+        receiptKey: "receipt-1",
+        businessAmount: 564,
+        privateAmount: 141,
+      }),
+    ).toEqual({
+      id: "entry-2",
+      date: "2026-06-09",
+      kind: "expense",
+      category: "車両費",
+      categoryCode: "601",
+      description: "SOLATOガソリン",
+      amount: 705,
+      deliveries: null,
+      onlineMinutes: null,
+      receiptKey: "receipt-1",
+      businessAmount: 564,
+      privateAmount: 141,
     });
   });
 });

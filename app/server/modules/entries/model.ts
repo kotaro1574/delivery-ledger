@@ -60,6 +60,8 @@ export namespace EntriesModel {
     deliveries: z.number().nullable(),
     onlineMinutes: z.number().nullable(),
     receiptKey: z.string().nullable(),
+    businessAmount: z.number().nullable(),
+    privateAmount: z.number().nullable(),
   });
   export type Item = z.infer<typeof Item>;
 

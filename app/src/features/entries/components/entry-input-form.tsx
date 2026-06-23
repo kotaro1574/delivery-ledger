@@ -406,9 +406,9 @@ export function EntryInputForm() {
                 >
                   件数
                 </label>
-                <div className="flex items-baseline rounded-lg border border-border bg-background px-3 py-2">
+                <div className="flex h-12 items-center rounded-lg border border-border bg-background px-3 py-2">
                   <Input
-                    className="h-auto border-0 bg-transparent p-0 font-mono shadow-none focus-visible:ring-0"
+                    className="h-auto min-w-0 border-0 bg-transparent p-0 font-mono shadow-none focus-visible:ring-0"
                     id="entry-deliveries"
                     inputMode="numeric"
                     onChange={(event) =>
@@ -417,7 +417,9 @@ export function EntryInputForm() {
                     placeholder="0"
                     value={deliveries}
                   />
-                  <span className="text-xs text-muted-foreground">件</span>
+                  <span className="shrink-0 whitespace-nowrap text-xs text-muted-foreground">
+                    件
+                  </span>
                 </div>
               </div>
               <div>
@@ -426,11 +428,11 @@ export function EntryInputForm() {
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                   <label
-                    className="flex items-baseline rounded-lg border border-border bg-background px-3 py-2"
+                    className="flex h-12 items-center rounded-lg border border-border bg-background px-3 py-2"
                     htmlFor="entry-online-hours"
                   >
                     <Input
-                      className="h-auto border-0 bg-transparent p-0 font-mono shadow-none focus-visible:ring-0"
+                      className="h-auto min-w-0 border-0 bg-transparent p-0 font-mono shadow-none focus-visible:ring-0"
                       id="entry-online-hours"
                       inputMode="numeric"
                       onChange={(event) => {
@@ -440,14 +442,16 @@ export function EntryInputForm() {
                       placeholder="0"
                       value={onlineHours}
                     />
-                    <span className="text-xs text-muted-foreground">時間</span>
+                    <span className="shrink-0 whitespace-nowrap text-xs text-muted-foreground">
+                      時間
+                    </span>
                   </label>
                   <label
-                    className="flex items-baseline rounded-lg border border-border bg-background px-3 py-2"
+                    className="flex h-12 items-center rounded-lg border border-border bg-background px-3 py-2"
                     htmlFor="entry-online-minutes"
                   >
                     <Input
-                      className="h-auto border-0 bg-transparent p-0 font-mono shadow-none focus-visible:ring-0"
+                      className="h-auto min-w-0 border-0 bg-transparent p-0 font-mono shadow-none focus-visible:ring-0"
                       id="entry-online-minutes"
                       inputMode="numeric"
                       maxLength={2}
@@ -458,7 +462,9 @@ export function EntryInputForm() {
                       placeholder="0"
                       value={onlineMinutes}
                     />
-                    <span className="text-xs text-muted-foreground">分</span>
+                    <span className="shrink-0 whitespace-nowrap text-xs text-muted-foreground">
+                      分
+                    </span>
                   </label>
                 </div>
               </div>

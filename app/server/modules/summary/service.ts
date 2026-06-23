@@ -9,6 +9,7 @@ import {
 import { and, eq, like, sql } from "drizzle-orm";
 import { calculateMetrics } from "./metrics";
 import type { SummaryModel } from "./model";
+import { buildYearlySummary } from "./yearly";
 
 export const SummaryService = {
   async monthly(userId: string, month: string): Promise<SummaryModel.Response> {
@@ -18,6 +19,7 @@ export const SummaryService = {
     const [
       revenueResult,
       expenseResult,
+      paidExpenseResult,
       byCategory,
       detailStatsRows,
       legacyStatsRows,
@@ -50,6 +52,19 @@ export const SummaryService = {
             like(journalEntries.entryDate, monthLike),
             eq(accounts.category, "expense"),
             eq(journalLines.side, "debit"),
+          ),
+        ),
+      db
+        .select({
+          total: sql<number>`coalesce(sum(${entryDetails.amount}), 0)`,
+        })
+        .from(journalEntries)
+        .innerJoin(entryDetails, eq(entryDetails.entryId, journalEntries.id))
+        .where(
+          and(
+            eq(journalEntries.userId, userId),
+            like(journalEntries.entryDate, monthLike),
+            eq(entryDetails.kind, "expense"),
           ),
         ),
       db
@@ -102,6 +117,7 @@ export const SummaryService = {
 
     const revenue = revenueResult[0]?.total ?? 0;
     const expense = expenseResult[0]?.total ?? 0;
+    const paidExpense = paidExpenseResult[0]?.total ?? 0;
     const detailDatesWithStats = new Set(
       detailStatsRows
         .filter(
@@ -133,6 +149,7 @@ export const SummaryService = {
     return {
       revenue,
       expense,
+      paidExpense,
       profit: revenue - expense,
       byCategory,
       metrics: calculateMetrics({
@@ -141,5 +158,92 @@ export const SummaryService = {
         onlineMinutes: stats.onlineMinutes ?? 0,
       }),
     };
+  },
+
+  async yearly(
+    userId: string,
+    year: string,
+  ): Promise<SummaryModel.YearlyResponse> {
+    const db = await getDB();
+    const yearLike = `${year}-%`;
+    const monthColumn = sql<string>`substr(${journalEntries.entryDate}, 1, 7)`;
+
+    const [revenue, expense, paidExpense, byCategory] = await Promise.all([
+      db
+        .select({
+          month: monthColumn,
+          total: sql<number>`coalesce(sum(${journalLines.amount}), 0)`,
+        })
+        .from(journalEntries)
+        .innerJoin(journalLines, eq(journalLines.entryId, journalEntries.id))
+        .innerJoin(accounts, eq(accounts.id, journalLines.accountId))
+        .where(
+          and(
+            eq(journalEntries.userId, userId),
+            like(journalEntries.entryDate, yearLike),
+            eq(accounts.category, "revenue"),
+            eq(journalLines.side, "credit"),
+          ),
+        )
+        .groupBy(monthColumn),
+      db
+        .select({
+          month: monthColumn,
+          total: sql<number>`coalesce(sum(${journalLines.amount}), 0)`,
+        })
+        .from(journalEntries)
+        .innerJoin(journalLines, eq(journalLines.entryId, journalEntries.id))
+        .innerJoin(accounts, eq(accounts.id, journalLines.accountId))
+        .where(
+          and(
+            eq(journalEntries.userId, userId),
+            like(journalEntries.entryDate, yearLike),
+            eq(accounts.category, "expense"),
+            eq(journalLines.side, "debit"),
+          ),
+        )
+        .groupBy(monthColumn),
+      db
+        .select({
+          month: monthColumn,
+          total: sql<number>`coalesce(sum(${entryDetails.amount}), 0)`,
+        })
+        .from(journalEntries)
+        .innerJoin(entryDetails, eq(entryDetails.entryId, journalEntries.id))
+        .where(
+          and(
+            eq(journalEntries.userId, userId),
+            like(journalEntries.entryDate, yearLike),
+            eq(entryDetails.kind, "expense"),
+          ),
+        )
+        .groupBy(monthColumn),
+      db
+        .select({
+          code: accounts.code,
+          name: accounts.name,
+          amount: sql<number>`coalesce(sum(${journalLines.amount}), 0)`,
+        })
+        .from(journalEntries)
+        .innerJoin(journalLines, eq(journalLines.entryId, journalEntries.id))
+        .innerJoin(accounts, eq(accounts.id, journalLines.accountId))
+        .where(
+          and(
+            eq(journalEntries.userId, userId),
+            like(journalEntries.entryDate, yearLike),
+            eq(accounts.category, "expense"),
+            eq(journalLines.side, "debit"),
+          ),
+        )
+        .groupBy(accounts.code, accounts.name),
+    ]);
+
+    return buildYearlySummary({
+      year,
+      revenue,
+      expense,
+      paidExpense,
+      byCategory,
+    });
   },
 };

@@ -8,7 +8,7 @@ import {
 } from "@server/db/schema";
 import { AccountCode, defaultCategoryRatios } from "@server/lib/accounts";
 import { BadRequestError, NotFoundError } from "@server/lib/errors";
-import { and, eq, like } from "drizzle-orm";
+import { and, eq, inArray, like } from "drizzle-orm";
 import type { BatchItem } from "drizzle-orm/batch";
 import { buildJournal } from "./journal";
 import type { EntriesModel } from "./model";
@@ -103,6 +103,43 @@ function journalLineStatements(
   );
 }
 
+async function expenseBreakdowns(entryIds: string[]) {
+  if (entryIds.length === 0) {
+    return new Map<string, { businessAmount: number; privateAmount: number }>();
+  }
+
+  const db = await getDB();
+  const rows = await db
+    .select({
+      entryId: journalLines.entryId,
+      accountCode: accounts.code,
+      accountCategory: accounts.category,
+      side: journalLines.side,
+      amount: journalLines.amount,
+    })
+    .from(journalLines)
+    .innerJoin(accounts, eq(accounts.id, journalLines.accountId))
+    .where(inArray(journalLines.entryId, entryIds));
+
+  return rows.reduce((map, row) => {
+    const value = map.get(row.entryId) ?? {
+      businessAmount: 0,
+      privateAmount: 0,
+    };
+
+    if (row.side === "debit" && row.accountCategory === "expense") {
+      value.businessAmount += row.amount;
+    }
+
+    if (row.side === "debit" && row.accountCode === AccountCode.ownerDraw) {
+      value.privateAmount += row.amount;
+    }
+
+    map.set(row.entryId, value);
+    return map;
+  }, new Map<string, { businessAmount: number; privateAmount: number }>());
+}
+
 export const EntriesService = {
   async create(
     userId: string,
@@ -159,6 +196,10 @@ export const EntriesService = {
         ),
       );
 
+    const breakdowns = await expenseBreakdowns(
+      rows.filter((row) => row.kind === "expense").map((row) => row.id),
+    );
+
     const items: EntriesModel.Item[] = rows
       .map((row) => ({
         id: row.id,
@@ -171,6 +212,14 @@ export const EntriesService = {
         deliveries: row.deliveries,
         onlineMinutes: row.onlineMinutes,
         receiptKey: row.receiptKey,
+        businessAmount:
+          row.kind === "expense"
+            ? (breakdowns.get(row.id)?.businessAmount ?? row.amount)
+            : null,
+        privateAmount:
+          row.kind === "expense"
+            ? (breakdowns.get(row.id)?.privateAmount ?? 0)
+            : null,
       }))
       .sort((a, b) => {
         const dateOrder = b.date.localeCompare(a.date);

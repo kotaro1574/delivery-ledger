@@ -1,6 +1,6 @@
 "use client";
 
-import { BookOpen, LogOut, PenLine } from "lucide-react";
+import { BarChart3, BookOpen, LogOut, PenLine } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 
 const navItems = [
   { href: "/", label: "台帳", icon: BookOpen },
+  { href: "/year", label: "年次", icon: BarChart3 },
   { href: "/input", label: "入力", icon: PenLine },
 ];
 

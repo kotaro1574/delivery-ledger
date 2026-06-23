@@ -250,12 +250,8 @@ export async function analyzeReceiptWithGemini({
           },
         ],
         generationConfig: {
-          responseFormat: {
-            text: {
-              mimeType: "application/json",
-              schema: receiptJsonSchema,
-            },
-          },
+          responseMimeType: "application/json",
+          responseSchema: receiptJsonSchema,
         },
       }),
     },

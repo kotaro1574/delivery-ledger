@@ -5,6 +5,20 @@ import { createPresignedReceiptUploadUrl } from "@server/lib/r2-presign";
 import type { ReceiptsModel } from "./model";
 import { analyzeReceiptWithGemini } from "./ocr";
 
+function createWorkerUploadUrl(key: string) {
+  return `/api/receipts/local-upload?key=${encodeURIComponent(key)}`;
+}
+
+function canUsePresignedUpload(env: CloudflareEnv) {
+  return Boolean(
+    env.UPLOAD_MODE === "presigned" &&
+      env.R2_BUCKET_NAME &&
+      env.CLOUDFLARE_ACCOUNT_ID &&
+      env.R2_ACCESS_KEY_ID &&
+      env.R2_SECRET_ACCESS_KEY,
+  );
+}
+
 export const ReceiptsService = {
   async createUploadUrl(
     userId: string,
@@ -13,16 +27,16 @@ export const ReceiptsService = {
     const { env } = await getCloudflareContext({ async: true });
     const key = buildReceiptKey(userId, crypto.randomUUID(), input.contentType);
 
-    if (env.UPLOAD_MODE === "local") {
+    if (canUsePresignedUpload(env)) {
       return {
         key,
-        url: `/api/receipts/local-upload?key=${encodeURIComponent(key)}`,
+        url: await createPresignedReceiptUploadUrl(key),
       };
     }
 
     return {
       key,
-      url: await createPresignedReceiptUploadUrl(key),
+      url: createWorkerUploadUrl(key),
     };
   },
 

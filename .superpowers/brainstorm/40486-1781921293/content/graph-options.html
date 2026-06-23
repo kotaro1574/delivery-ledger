@@ -1,0 +1,284 @@
+<style>
+  .ledger-grid {
+    display: grid;
+    gap: 18px;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  }
+
+  .ledger-card {
+    background: #fffdf8;
+    border: 1px solid #e6ded0;
+    border-radius: 16px;
+    box-shadow: 0 12px 30px rgba(36, 31, 25, 0.08);
+    cursor: pointer;
+    overflow: hidden;
+    transition:
+      border-color 0.16s ease,
+      box-shadow 0.16s ease,
+      transform 0.16s ease;
+  }
+
+  .ledger-card:hover,
+  .ledger-card.selected {
+    border-color: #a8543a;
+    box-shadow: 0 16px 36px rgba(168, 84, 58, 0.18);
+    transform: translateY(-2px);
+  }
+
+  .ledger-body {
+    padding: 18px;
+  }
+
+  .ledger-eyebrow {
+    color: #80786c;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+
+  .ledger-title {
+    color: #25221e;
+    font-size: 19px;
+    font-weight: 900;
+    margin: 7px 0 5px;
+  }
+
+  .ledger-desc {
+    color: #6f675b;
+    font-size: 13px;
+    line-height: 1.65;
+    margin: 0 0 14px;
+  }
+
+  .mini-dashboard {
+    background: #f8f3ea;
+    border-top: 1px solid #e6ded0;
+    padding: 14px;
+  }
+
+  .kpis {
+    display: grid;
+    gap: 8px;
+    grid-template-columns: repeat(3, 1fr);
+    margin-bottom: 14px;
+  }
+
+  .kpi {
+    background: #fffdf8;
+    border: 1px solid #e6ded0;
+    border-radius: 10px;
+    padding: 9px;
+  }
+
+  .kpi-label {
+    color: #837a6e;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+  }
+
+  .kpi-value {
+    color: #25221e;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 15px;
+    font-weight: 900;
+    margin-top: 3px;
+  }
+
+  .chart {
+    align-items: end;
+    background: linear-gradient(to top, rgba(230, 222, 208, 0.6) 1px, transparent 1px);
+    background-size: 100% 26px;
+    border-bottom: 1px solid #d9d0c1;
+    display: grid;
+    gap: 6px;
+    grid-template-columns: repeat(12, 1fr);
+    height: 126px;
+    padding-top: 8px;
+    position: relative;
+  }
+
+  .bar-stack {
+    align-items: end;
+    display: flex;
+    gap: 2px;
+    height: 100%;
+    justify-content: center;
+  }
+
+  .bar {
+    border-radius: 999px 999px 0 0;
+    min-height: 4px;
+    width: 9px;
+  }
+
+  .income {
+    background: #31745f;
+  }
+
+  .expense {
+    background: #a8543a;
+  }
+
+  .profit-line {
+    border-top: 3px solid #24211d;
+    border-radius: 999px;
+    left: 18px;
+    opacity: 0.86;
+    position: absolute;
+    right: 18px;
+    top: 45px;
+    transform: rotate(-5deg);
+  }
+
+  .donut-wrap {
+    align-items: center;
+    display: grid;
+    gap: 14px;
+    grid-template-columns: 110px 1fr;
+  }
+
+  .donut {
+    aspect-ratio: 1;
+    background: conic-gradient(#a8543a 0 44%, #d59b63 44% 64%, #31745f 64% 78%, #e1d8c9 78% 100%);
+    border-radius: 999px;
+    display: grid;
+    place-items: center;
+  }
+
+  .donut::after {
+    background: #fffdf8;
+    border-radius: 999px;
+    content: "";
+    height: 58px;
+    width: 58px;
+  }
+
+  .legend {
+    display: grid;
+    gap: 8px;
+  }
+
+  .legend-row {
+    align-items: center;
+    color: #5f574d;
+    display: grid;
+    font-size: 12px;
+    font-weight: 800;
+    gap: 8px;
+    grid-template-columns: 10px 1fr auto;
+  }
+
+  .dot {
+    border-radius: 99px;
+    height: 10px;
+    width: 10px;
+  }
+
+  .insight {
+    background: #fffdf8;
+    border: 1px solid #e6ded0;
+    border-radius: 12px;
+    color: #5f574d;
+    font-size: 12px;
+    font-weight: 750;
+    line-height: 1.6;
+    margin-top: 12px;
+    padding: 10px;
+  }
+</style>
+
+<h2>どのグラフが一番「役立つ」？</h2>
+<p class="subtitle">
+  実装コストより実用性重視で、配達収支アプリに入れるグラフ案を3つ並べたよ。気になる案をクリックして選んでね。
+</p>
+
+<div class="ledger-grid">
+  <div class="ledger-card" data-choice="daily-trend" onclick="toggleSelect(this)">
+    <div class="ledger-body">
+      <div class="ledger-eyebrow">Recommended</div>
+      <div class="ledger-title">日別収支トレンド</div>
+      <p class="ledger-desc">
+        日ごとの売上、事業経費、利益を一枚で見る。稼働日ごとの良し悪し、経費が重い日、利益が伸びた日が分かる。
+      </p>
+    </div>
+    <div class="mini-dashboard">
+      <div class="kpis">
+        <div class="kpi"><div class="kpi-label">最高利益日</div><div class="kpi-value">6/14</div></div>
+        <div class="kpi"><div class="kpi-label">平均利益</div><div class="kpi-value">¥4,642</div></div>
+        <div class="kpi"><div class="kpi-label">経費率</div><div class="kpi-value">0.9%</div></div>
+      </div>
+      <div class="chart">
+        <div class="profit-line"></div>
+        <div class="bar-stack"><div class="bar income" style="height:42%"></div><div class="bar expense" style="height:7%"></div></div>
+        <div class="bar-stack"><div class="bar income" style="height:64%"></div><div class="bar expense" style="height:9%"></div></div>
+        <div class="bar-stack"><div class="bar income" style="height:34%"></div><div class="bar expense" style="height:4%"></div></div>
+        <div class="bar-stack"><div class="bar income" style="height:76%"></div><div class="bar expense" style="height:11%"></div></div>
+        <div class="bar-stack"><div class="bar income" style="height:56%"></div><div class="bar expense" style="height:8%"></div></div>
+        <div class="bar-stack"><div class="bar income" style="height:82%"></div><div class="bar expense" style="height:5%"></div></div>
+        <div class="bar-stack"><div class="bar income" style="height:40%"></div><div class="bar expense" style="height:13%"></div></div>
+        <div class="bar-stack"><div class="bar income" style="height:72%"></div><div class="bar expense" style="height:6%"></div></div>
+        <div class="bar-stack"><div class="bar income" style="height:50%"></div><div class="bar expense" style="height:7%"></div></div>
+        <div class="bar-stack"><div class="bar income" style="height:88%"></div><div class="bar expense" style="height:10%"></div></div>
+        <div class="bar-stack"><div class="bar income" style="height:58%"></div><div class="bar expense" style="height:5%"></div></div>
+        <div class="bar-stack"><div class="bar income" style="height:68%"></div><div class="bar expense" style="height:8%"></div></div>
+      </div>
+      <div class="insight">向いてる用途: 稼働パターン改善、今月あとどれくらい稼ぐかの判断</div>
+    </div>
+  </div>
+
+  <div class="ledger-card" data-choice="expense-analysis" onclick="toggleSelect(this)">
+    <div class="ledger-body">
+      <div class="ledger-eyebrow">Tax friendly</div>
+      <div class="ledger-title">経費・按分分析</div>
+      <p class="ledger-desc">
+        支払総額、事業分、私用分、科目別の割合を見せる。年末や確定申告前の確認に強い。
+      </p>
+    </div>
+    <div class="mini-dashboard">
+      <div class="donut-wrap">
+        <div class="donut"></div>
+        <div class="legend">
+          <div class="legend-row"><span class="dot" style="background:#a8543a"></span><span>車両費（事業分）</span><strong>¥564</strong></div>
+          <div class="legend-row"><span class="dot" style="background:#d59b63"></span><span>私用分</span><strong>¥141</strong></div>
+          <div class="legend-row"><span class="dot" style="background:#31745f"></span><span>通信費</span><strong>¥0</strong></div>
+          <div class="legend-row"><span class="dot" style="background:#e1d8c9"></span><span>その他</span><strong>¥0</strong></div>
+        </div>
+      </div>
+      <div class="insight">向いてる用途: 経費の偏り、事業割合の説明、証憑チェック</div>
+    </div>
+  </div>
+
+  <div class="ledger-card" data-choice="monthly-forecast" onclick="toggleSelect(this)">
+    <div class="ledger-body">
+      <div class="ledger-eyebrow">Planning</div>
+      <div class="ledger-title">月次ペース予測</div>
+      <p class="ledger-desc">
+        今月の実績から月末着地を予測。目標利益まであといくら必要か、残り何日でどれくらい稼げばいいかを見る。
+      </p>
+    </div>
+    <div class="mini-dashboard">
+      <div class="kpis">
+        <div class="kpi"><div class="kpi-label">現在利益</div><div class="kpi-value">¥64,995</div></div>
+        <div class="kpi"><div class="kpi-label">着地予測</div><div class="kpi-value">¥102k</div></div>
+        <div class="kpi"><div class="kpi-label">目標差分</div><div class="kpi-value">+¥18k</div></div>
+      </div>
+      <div class="chart">
+        <div class="bar-stack"><div class="bar income" style="height:38%"></div></div>
+        <div class="bar-stack"><div class="bar income" style="height:52%"></div></div>
+        <div class="bar-stack"><div class="bar income" style="height:60%"></div></div>
+        <div class="bar-stack"><div class="bar income" style="height:67%"></div></div>
+        <div class="bar-stack"><div class="bar income" style="height:72%"></div></div>
+        <div class="bar-stack"><div class="bar income" style="height:78%"></div></div>
+        <div class="bar-stack"><div class="bar income" style="height:82%"></div></div>
+        <div class="bar-stack"><div class="bar income" style="height:90%; opacity:.45"></div></div>
+        <div class="bar-stack"><div class="bar income" style="height:96%; opacity:.45"></div></div>
+        <div class="bar-stack"><div class="bar income" style="height:100%; opacity:.45"></div></div>
+        <div class="bar-stack"><div class="bar income" style="height:106%; opacity:.45"></div></div>
+        <div class="bar-stack"><div class="bar income" style="height:112%; opacity:.45"></div></div>
+      </div>
+      <div class="insight">向いてる用途: 月末目標、稼働計画、休む/走る判断</div>
+    </div>
+  </div>
+</div>
