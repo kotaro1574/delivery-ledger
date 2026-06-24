@@ -113,6 +113,8 @@ describe("LedgerDashboard", () => {
       />,
     );
 
+    expect(screen.getByText("6/10(水)")).toBeInTheDocument();
+
     await userEvent.click(
       screen.getByRole("button", { name: "削除 夜ピーク" }),
     );
@@ -125,7 +127,7 @@ describe("LedgerDashboard", () => {
     );
   });
 
-  it("経費の事業分と私用分を区別して表示する", () => {
+  it("経費の事業分と私用分を区別して表示する", async () => {
     render(
       <LedgerDashboard
         month="2026-06"
@@ -161,6 +163,20 @@ describe("LedgerDashboard", () => {
     expect(screen.getByText("私用分 ¥141")).toBeInTheDocument();
     expect(screen.getByText("事業分 ¥564 / 私用分 ¥141")).toBeInTheDocument();
     expect(screen.getByText("経費内訳（事業分）")).toBeInTheDocument();
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "編集 SOLATOガソリン" }),
+    );
+
+    const receiptImage = screen.getByRole("img", {
+      name: "SOLATOガソリンのレシート画像",
+    });
+
+    expect(screen.getByText("レシート画像")).toBeInTheDocument();
+    expect(receiptImage).toHaveAttribute(
+      "src",
+      "/api/receipts/view?key=receipt-1",
+    );
   });
 
   it("日別収支トレンドを表示する", () => {
@@ -238,7 +254,7 @@ describe("LedgerDashboard", () => {
     expect(screen.getByText("DAILY TREND")).toBeInTheDocument();
     expect(screen.getByText("日別収支トレンド")).toBeInTheDocument();
     expect(screen.getByText("最高利益日")).toBeInTheDocument();
-    expect(screen.getByText("6/9")).toBeInTheDocument();
+    expect(screen.getAllByText("6/9").length).toBeGreaterThanOrEqual(2);
     expect(screen.getByText("平均利益")).toBeInTheDocument();
     expect(screen.getByText("¥4,918")).toBeInTheDocument();
     expect(screen.getByText("経費率")).toBeInTheDocument();

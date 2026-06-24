@@ -43,6 +43,6 @@ export const initialAccounts = [
 export type AccountCategory = (typeof initialAccounts)[number]["category"];
 
 export const defaultCategoryRatios = [
-  { accountCode: AccountCode.vehicleExpense, businessRatio: 80 },
+  { accountCode: AccountCode.vehicleExpense, businessRatio: 100 },
   { accountCode: AccountCode.communication, businessRatio: 70 },
 ] as const;

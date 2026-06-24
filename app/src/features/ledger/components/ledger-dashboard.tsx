@@ -10,6 +10,7 @@ import {
   Trash2,
   X,
 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -46,6 +47,14 @@ function moveMonth(month: string, offset: number) {
   const [year, rawMonth] = month.split("-").map(Number);
   const date = new Date(year, rawMonth - 1 + offset, 1);
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+}
+
+function displayEntryDate(date: string) {
+  const [year, month, day] = date.split("-").map(Number);
+  const weekdays = ["日", "月", "火", "水", "木", "金", "土"];
+  const weekday = weekdays[new Date(year, month - 1, day).getDay()];
+
+  return `${month}/${day}(${weekday})`;
 }
 
 function numberOnly(value: string) {
@@ -90,6 +99,10 @@ function formOnlineMinutes(form: EditForm) {
     Number.parseInt(form.onlineHours || "0", 10) * 60 +
     Number.parseInt(form.onlineMinutes || "0", 10)
   );
+}
+
+function receiptImageUrl(receiptKey: string) {
+  return `/api/receipts/view?key=${encodeURIComponent(receiptKey)}`;
 }
 
 export function LedgerDashboard({
@@ -340,11 +353,11 @@ export function LedgerDashboard({
           {entries.length > 0 ? (
             entries.map((entry) => (
               <div
-                className="grid grid-cols-[3.5rem_minmax(0,1fr)_auto_auto] items-center gap-3 border-b border-border px-5 py-3 last:border-b-0"
+                className="grid grid-cols-[4.75rem_minmax(0,1fr)_auto_auto] items-center gap-3 border-b border-border px-5 py-3 last:border-b-0"
                 key={entry.id}
               >
                 <span className="font-mono text-sm font-bold text-muted-foreground">
-                  {entry.date.slice(5).replace("-", "/")}
+                  {displayEntryDate(entry.date)}
                 </span>
                 <span className="min-w-0">
                   <span className="block truncate text-sm font-bold">
@@ -564,6 +577,25 @@ export function LedgerDashboard({
                   </div>
                 </div>
               )}
+
+              {editing.kind === "expense" && form.receiptKey ? (
+                <div>
+                  <div className="mb-2 text-xs tracking-widest text-muted-foreground">
+                    レシート画像
+                  </div>
+                  <div className="flex justify-center overflow-hidden rounded-lg border border-border bg-background p-3">
+                    <Image
+                      alt={`${editing.description}のレシート画像`}
+                      className="h-auto max-h-72 w-auto max-w-full object-contain"
+                      height={1280}
+                      sizes="(max-width: 768px) 100vw, 36rem"
+                      src={receiptImageUrl(form.receiptKey)}
+                      unoptimized
+                      width={960}
+                    />
+                  </div>
+                </div>
+              ) : null}
 
               <Textarea
                 className="bg-background"

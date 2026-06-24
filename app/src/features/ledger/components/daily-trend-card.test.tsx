@@ -74,11 +74,14 @@ describe("DailyTrendCard", () => {
       />,
     );
 
+    expect(screen.getByText("6/1")).toBeInTheDocument();
+    expect(screen.getByText("6/2")).toBeInTheDocument();
+    expect(screen.getByText("6/3")).toBeInTheDocument();
     expect(screen.getByTestId("daily-trend-scroll")).toHaveClass(
       "overflow-x-auto",
     );
     expect(screen.getByTestId("daily-trend-chart-area")).toHaveClass(
-      "min-w-[42rem]",
+      "min-w-[64rem]",
     );
   });
 });

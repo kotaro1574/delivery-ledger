@@ -13,7 +13,7 @@ export type PreviewLine = {
 };
 
 export const expenseCategories: ExpenseCategory[] = [
-  { code: "601", name: "車両費", ratio: 80 },
+  { code: "601", name: "車両費", ratio: 100 },
   { code: "603", name: "通信費", ratio: 70 },
   { code: "604", name: "消耗品費", ratio: 100 },
   { code: "605", name: "損害保険料", ratio: 100 },

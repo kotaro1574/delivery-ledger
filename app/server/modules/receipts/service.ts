@@ -1,5 +1,9 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
-import { BadRequestError } from "@server/lib/errors";
+import {
+  BadRequestError,
+  ForbiddenError,
+  NotFoundError,
+} from "@server/lib/errors";
 import { buildReceiptKey, getReceiptsBucket } from "@server/lib/r2";
 import { createPresignedReceiptUploadUrl } from "@server/lib/r2-presign";
 import type { ReceiptsModel } from "./model";
@@ -48,6 +52,28 @@ export const ReceiptsService = {
       httpMetadata: { contentType },
     });
     return { ok: true };
+  },
+
+  async view(userId: string, key: string) {
+    if (!key.startsWith(`r/${userId}/`)) {
+      throw new ForbiddenError("レシート画像を表示できません");
+    }
+
+    const bucket = await getReceiptsBucket();
+    const object = await bucket.get(key);
+
+    if (!object) {
+      throw new NotFoundError("レシート画像が見つかりません");
+    }
+
+    return new Response(object.body, {
+      headers: {
+        "cache-control": "private, max-age=300",
+        "content-type":
+          object.httpMetadata?.contentType ?? "application/octet-stream",
+        etag: object.httpEtag,
+      },
+    });
   },
 
   async analyzeReceipt(file: File): Promise<ReceiptsModel.AnalyzeResponse> {

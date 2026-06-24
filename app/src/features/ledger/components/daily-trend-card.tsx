@@ -26,10 +26,6 @@ function displayMonth(month: string) {
   return `${year}年${Number(rawMonth)}月`;
 }
 
-function showDayLabel(index: number, length: number) {
-  return index === 0 || index === length - 1 || (index + 1) % 5 === 0;
-}
-
 function clamp(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), max);
 }
@@ -47,7 +43,7 @@ export function DailyTrendCard({
     (point) => point.revenue > 0 || point.expense > 0,
   );
   const chart = {
-    width: 720,
+    width: 1080,
     height: 280,
     left: 40,
     right: 18,
@@ -203,7 +199,7 @@ export function DailyTrendCard({
             onScroll={() => setActiveDate(null)}
           >
             <fieldset
-              className="relative m-0 min-w-[42rem] border-0 p-0 sm:min-w-0"
+              className="relative m-0 min-w-[64rem] border-0 p-0"
               data-testid="daily-trend-chart-area"
               onBlur={handleBlur}
               onPointerLeave={() => setActiveDate(null)}
@@ -266,18 +262,16 @@ export function DailyTrendCard({
                         x={x + 1}
                         y={Math.min(zeroY, expenseY)}
                       />
-                      {showDayLabel(index, trend.points.length) ? (
-                        <text
-                          fill="rgb(122 116 101)"
-                          fontSize="11"
-                          fontWeight="700"
-                          textAnchor="middle"
-                          x={x}
-                          y={chart.height - 12}
-                        >
-                          {point.label}
-                        </text>
-                      ) : null}
+                      <text
+                        fill="rgb(122 116 101)"
+                        fontSize="10"
+                        fontWeight="700"
+                        textAnchor="middle"
+                        x={x}
+                        y={chart.height - 12}
+                      >
+                        {point.label}
+                      </text>
                     </g>
                   );
                 })}

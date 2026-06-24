@@ -30,6 +30,16 @@ export const ReceiptsApp = createApp()
     const result = await ReceiptsService.putLocal(key, c.req.raw);
     return c.json(result);
   })
+  .get("/view", async (c) => {
+    const session = await requireAuth(c.req.raw.headers);
+    const key = c.req.query("key");
+
+    if (!key) {
+      throw new BadRequestError("key が必要です");
+    }
+
+    return ReceiptsService.view(session.user.id, key);
+  })
   .post("/analyze", async (c) => {
     await requireAuth(c.req.raw.headers);
     const formData = await c.req.raw.formData();

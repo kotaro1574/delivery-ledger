@@ -57,19 +57,18 @@ describe("buildJournal", () => {
     ]);
   });
 
-  it("車両費80%を四捨五入し、差額を私用分にする", () => {
+  it("車両費100%を全額事業分にする", () => {
     const entry = buildJournal({
       kind: "expense",
       userId: "user-1",
       date: "2026-05-31",
       amount: 999,
       categoryCode: "601",
-      businessRatio: 80,
+      businessRatio: 100,
     });
 
     expect(entry.lines).toEqual([
-      { accountCode: "601", side: "debit", amount: 799 },
-      { accountCode: "334", side: "debit", amount: 200 },
+      { accountCode: "601", side: "debit", amount: 999 },
       { accountCode: "101", side: "credit", amount: 999 },
     ]);
     expect(entry.debitTotal).toBe(entry.creditTotal);
