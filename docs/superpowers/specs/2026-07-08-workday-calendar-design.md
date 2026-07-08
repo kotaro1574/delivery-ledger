@@ -1,0 +1,48 @@
+# 稼働日フィールドの shadcn Calendar 化 設計
+
+日付: 2026-07-08
+
+## 目的
+
+入力フォーム（`app/src/features/entries/components/entry-input-form.tsx`）の稼働日フィールドを、ネイティブの `<input type="date">` から shadcn/ui の Date Picker パターン（Popover + Calendar）に置き換える。
+
+## 決定事項
+
+- **UI パターン**: Popover 式。稼働日ボタンをタップするとカレンダーがポップアップで開く（shadcn 公式 date-picker.mdx の構成）。インライン常時表示は不採用（フォームの縦幅が伸びすぎるため）。
+- **日付制限**: 未来の日付（明日以降）は選択不可。`disabled: { after: today }` でグレーアウトする。
+- **ロケール**: `react-day-picker/locale` の `ja` を `Calendar` の `locale` prop に渡して日本語表示にする。
+
+## UI 仕様
+
+- トリガーは `Button variant="outline"`。CalendarIcon（lucide-react）+ 日付テキストを表示する。
+- 日付テキストは `2026/07/08（今日）` 形式。ヘッダーで使っている既存の `dateLabel` ロジックを流用する。date-fns は追加しない。
+- ラベル `稼働日`（`htmlFor="entry-date"`）は維持する。button は labelable 要素なのでトリガーボタンに `id="entry-date"` を付けて関連付ける。
+- 日付を選択したら Popover を自動で閉じる（`open` を state 管理し、`onSelect` で閉じる）。
+- カレンダーの見た目はプロジェクトのテーマ変数（globals.css の CSS variables）に従う。追加のカスタム配色はしない。
+
+## 状態管理・データフロー
+
+- `entryDate` state は現行の `"YYYY-MM-DD"` 文字列のまま維持する。API の body と レシート OCR の `result.date` 反映が文字列前提のため。
+- 変換は境界でのみ行う:
+  - 文字列 → Date: `new Date(year, month - 1, day)` でローカルタイムとして生成する。`new Date("YYYY-MM-DD")` は UTC 解釈で日付がずれる可能性があるため使わない。
+  - Date → 文字列: 既存 `todayString()` と同じ整形ロジックを `Date` 引数を取る関数に一般化して共用する。
+- `onSelect` が `undefined` を渡してきた場合（選択済みの日を再タップ）は無視して現在の選択を維持する。
+- 日付変更時は現行どおり `setSaved(false)` を呼ぶ。
+
+## 追加コンポーネント・依存
+
+- `npx shadcn@latest add calendar popover` を実行する。
+  - 追加されるファイル: `src/components/ui/calendar.tsx`, `src/components/ui/popover.tsx`
+  - 追加される依存: `react-day-picker`, `@radix-ui/react-popover`
+
+## テスト
+
+`app/src/features/entries/components/entry-input-form.test.tsx` を更新する:
+
+- 「選択した稼働日を収入保存のdateとして送信する」: `fireEvent.change` での日付入力を「トリガーボタンをクリック → カレンダーの日付セルをクリック」に書き換える。選択対象は表示中の月（当月）の過去日とし、期待値はテスト内で動的に算出する。
+- 「経費レシートOCR結果をフォームに反映する」: `toHaveValue("2026-06-10")` をトリガーボタンの表示テキスト検証（`toHaveTextContent("2026/06/10")`）に変更する。
+- 追加テスト: 未来日（明日）のセルが disabled であることを検証する。
+
+## エラーハンドリング
+
+追加なし。`entryDate` は初期値が今日で、カレンダー選択でしか変化しないため常に有効値。保存時バリデーション（`!entryDate` チェック）は現状のまま。
