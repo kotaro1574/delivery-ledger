@@ -4,7 +4,10 @@
 
 ## 目的
 
-入力フォーム（`app/src/features/entries/components/entry-input-form.tsx`）の稼働日フィールドを、ネイティブの `<input type="date">` から shadcn/ui の Date Picker パターン（Popover + Calendar）に置き換える。
+稼働日を入力するフォームすべてで、ネイティブの `<input type="date">` を shadcn/ui の Date Picker パターン（Popover + Calendar）に置き換える。対象は次の2箇所:
+
+1. 入力フォーム（`app/src/features/entries/components/entry-input-form.tsx`）
+2. 取引編集ダイアログ（`app/src/features/ledger/components/ledger-dashboard.tsx` の「取引編集」、`id="edit-date"` フィールド）
 
 ## 決定事項
 
@@ -35,6 +38,13 @@
   - 追加されるファイル: `src/components/ui/calendar.tsx`, `src/components/ui/popover.tsx`
   - 追加される依存: `react-day-picker`, `@radix-ui/react-popover`
 
+## 取引編集ダイアログ（追補 2026-07-12）
+
+- 編集ダイアログの稼働日フィールドにも入力フォームと同一の Popover + Calendar パターンを適用する（ja locale・未来日選択不可・選択で自動クローズ・`variant="outline"` トリガー + CalendarIcon・`YYYY/MM/DD（今日）` 表示）。
+- ダイアログを開閉した際に Popover の開状態が持ち越されないよう、ダイアログの open/close 時に Popover の open state をリセットする。
+- 日付ヘルパーは `app/src/lib/date.ts` に抽出して両コンポーネントで共有する: `formatDateString(date: Date): string`、`todayString(): string`、`parseDateString(value: string): Date`、`formatDateLabel(value: string): string`（`YYYY/MM/DD`、今日なら `（今日）` サフィックス）。`entry-input-form.tsx` のローカル実装はこの共有版に置き換える。
+- 編集ダイアログは Radix Dialog ではなく `fixed inset-0 z-50` の自前オーバーレイ。PopoverContent は body へ portal され DOM 順で後になるため、同じ `z-50` でもカレンダーはダイアログの上に描画される（実装時に目視確認すること）。
+
 ## テスト
 
 `app/src/features/entries/components/entry-input-form.test.tsx` を更新する:
@@ -42,6 +52,10 @@
 - 「選択した稼働日を収入保存のdateとして送信する」: `fireEvent.change` での日付入力を「トリガーボタンをクリック → カレンダーの日付セルをクリック」に書き換える。選択対象は表示中の月（当月）の過去日とし、期待値はテスト内で動的に算出する。
 - 「経費レシートOCR結果をフォームに反映する」: `toHaveValue("2026-06-10")` をトリガーボタンの表示テキスト検証（`toHaveTextContent("2026/06/10")`）に変更する。
 - 追加テスト: 未来日（明日）のセルが disabled であることを検証する。
+
+`app/src/features/ledger/components/ledger-dashboard.test.tsx` に追加する（追補 2026-07-12）:
+
+- 編集ダイアログを開き、カレンダーで別の日を選択して「更新する」を押すと、PATCH body の `date` に選択日が入ることを検証する。
 
 ## エラーハンドリング
 

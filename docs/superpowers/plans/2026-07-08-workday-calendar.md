@@ -283,3 +283,251 @@ Expected: すべて成功。biome の import 順序エラーが出たら `npm ru
 git add app/src/features/entries/components/entry-input-form.tsx app/src/features/entries/components/entry-input-form.test.tsx
 git commit -m "Replace workday date input with shadcn calendar date picker"
 ```
+
+---
+
+### Task 3: 取引編集ダイアログの稼働日を Date Picker に置き換え + 日付 util 共通化（TDD）
+
+**Files:**
+- Create: `app/src/lib/date.ts`
+- Modify: `app/src/features/entries/components/entry-input-form.tsx`（ローカル日付ヘルパーを共有版 import に置き換え）
+- Modify: `app/src/features/ledger/components/ledger-dashboard.tsx`（編集ダイアログの date Input を Popover + Calendar に置き換え）
+- Test: `app/src/features/ledger/components/ledger-dashboard.test.tsx`
+
+**Interfaces:**
+- Consumes: Task 1 の `Calendar` / `Popover` / `PopoverTrigger`（asChild）/ `PopoverContent`、`react-day-picker/locale` の `ja`、Task 2 が entry-input-form に実装した日付ヘルパーのロジック
+- Produces: `@/lib/date` から `formatDateString(date: Date): string` / `todayString(): string` / `parseDateString(value: string): Date` / `formatDateLabel(value: string): string` を export
+
+- [ ] **Step 1: 失敗するテストを追加する**
+
+`app/src/features/ledger/components/ledger-dashboard.test.tsx` を編集する。
+
+`afterEach` に timer 復元を追加:
+
+```tsx
+  afterEach(() => {
+    vi.restoreAllMocks();
+    vi.unstubAllGlobals();
+    vi.useRealTimers();
+  });
+```
+
+describe 内に以下のテストを追加する（システム時刻を 2026-06-15 に固定。fixture の date は 2026-06-10 なのでカレンダーは 2026年6月で開き、「4」のセルは当月 6/4（enabled）と outside day 7/4（未来日で disabled）のみ。`!button.disabled` フィルタで 6/4 が一意に取れる）:
+
+```tsx
+  it("編集ダイアログのカレンダーで稼働日を変更してPATCHに送信する", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date(2026, 5, 15));
+    const fetchMock = vi.fn(async () => Response.json({ id: "entry-1" }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      <LedgerDashboard
+        month="2026-06"
+        summary={summary}
+        entries={[
+          {
+            id: "entry-1",
+            date: "2026-06-10",
+            kind: "income",
+            category: "売上高",
+            categoryCode: "501",
+            description: "夜ピーク",
+            amount: 8200,
+            deliveries: 8,
+            onlineMinutes: 270,
+            receiptKey: null,
+            businessAmount: null,
+            privateAmount: null,
+          },
+        ]}
+      />,
+    );
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "編集 夜ピーク" }),
+    );
+    await userEvent.click(screen.getByLabelText("稼働日"));
+    const dayButton = screen
+      .getAllByRole("button")
+      .filter(
+        (button): button is HTMLButtonElement =>
+          button instanceof HTMLButtonElement,
+      )
+      .find((button) => button.textContent === "4" && !button.disabled);
+    expect(dayButton).toBeDefined();
+    await userEvent.click(dayButton as HTMLButtonElement);
+    expect(screen.getByLabelText("稼働日")).toHaveTextContent("2026/06/04");
+    await userEvent.click(screen.getByRole("button", { name: "更新する" }));
+
+    await waitFor(() => expect(fetchMock).toHaveBeenCalled());
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/entries/entry-1",
+      expect.objectContaining({
+        method: "PATCH",
+        body: JSON.stringify({
+          kind: "income",
+          date: "2026-06-04",
+          amount: 8200,
+          deliveries: 8,
+          onlineMinutes: 270,
+          memo: "夜ピーク",
+        }),
+      }),
+    );
+  });
+```
+
+- [ ] **Step 2: テストが失敗することを確認**
+
+Run: `cd app && npm run test:run -- src/features/ledger/components/ledger-dashboard.test.tsx`
+
+Expected: 追加した1件が FAIL（現状はネイティブ input なので `getByLabelText("稼働日")` クリックでカレンダーが開かず、`dayButton` が undefined になり `expect(dayButton).toBeDefined()` で落ちる）。既存テストは PASS のまま。
+
+- [ ] **Step 3: 共有 util を作成する**
+
+`app/src/lib/date.ts` を新規作成:
+
+```tsx
+export function formatDateString(date: Date) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+}
+
+export function todayString() {
+  return formatDateString(new Date());
+}
+
+export function parseDateString(value: string) {
+  const [year, month, day] = value.split("-").map(Number);
+  return new Date(year, month - 1, day);
+}
+
+export function formatDateLabel(value: string) {
+  const label = value.replaceAll("-", "/");
+  return value === todayString() ? `${label}（今日）` : label;
+}
+```
+
+- [ ] **Step 4: entry-input-form を共有 util に切り替える**
+
+`app/src/features/entries/components/entry-input-form.tsx` を編集する:
+
+1. ローカルの `formatDateString` / `todayString` / `parseDateString` 関数定義を削除し、import に追加する:
+
+```tsx
+import {
+  formatDateString,
+  formatDateLabel,
+  parseDateString,
+  todayString,
+} from "@/lib/date";
+```
+
+2. コンポーネント内の `const today = todayString();` と、`dateLabel` の三項演算子による算出を削除し、以下に置き換える:
+
+```tsx
+const dateLabel = formatDateLabel(entryDate);
+```
+
+（`todayString()` は `entryDate` の useState 初期値でのみ使用が残る）
+
+- [ ] **Step 5: 編集ダイアログを Popover + Calendar に置き換える**
+
+`app/src/features/ledger/components/ledger-dashboard.tsx` を編集する:
+
+1. import を追加（lucide の `Calendar` は `CalendarIcon` に alias。`Button` / `Calendar` / `Popover` 系 / `ja` / 日付 util を追加）:
+
+```tsx
+import { Calendar as CalendarIcon } from "lucide-react";
+import { ja } from "react-day-picker/locale";
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  formatDateLabel,
+  formatDateString,
+  parseDateString,
+} from "@/lib/date";
+```
+
+既存の lucide import（`X` など）とはマージすること。
+
+2. `const [saving, setSaving] = useState(false);` の近くに Popover 開閉 state を追加:
+
+```tsx
+const [dateOpen, setDateOpen] = useState(false);
+```
+
+3. `openEdit` と `closeEdit` の両方で開状態をリセット（ダイアログ開閉で Popover が開いたまま持ち越されるのを防ぐ）:
+
+```tsx
+  const openEdit = (entry: EntriesModel.Item) => {
+    setEditing(entry);
+    setForm(initialEditForm(entry));
+    setDateOpen(false);
+  };
+
+  const closeEdit = () => {
+    setEditing(null);
+    setForm(null);
+    setDateOpen(false);
+  };
+```
+
+4. 稼働日フィールド（`<label htmlFor="edit-date">` 直下の `<Input ... id="edit-date" type="date" ... />`）を以下に置き換える:
+
+```tsx
+                <Popover onOpenChange={setDateOpen} open={dateOpen}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      className="w-full justify-start bg-background font-mono font-normal"
+                      id="edit-date"
+                      type="button"
+                      variant="outline"
+                    >
+                      <CalendarIcon className="size-4 text-muted-foreground" />
+                      {formatDateLabel(form.date)}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent align="start" className="w-auto p-0">
+                    <Calendar
+                      defaultMonth={parseDateString(form.date)}
+                      disabled={{ after: new Date() }}
+                      locale={ja}
+                      mode="single"
+                      onSelect={(date) => {
+                        if (date) {
+                          updateForm({ date: formatDateString(date) });
+                        }
+                        setDateOpen(false);
+                      }}
+                      selected={parseDateString(form.date)}
+                    />
+                  </PopoverContent>
+                </Popover>
+```
+
+`Input` がこのファイルで他に使われている場合は import を残す。使われていなければ import から外す。
+
+- [ ] **Step 6: 対象テストが通ることを確認**
+
+Run: `cd app && npm run test:run -- src/features/ledger/components/ledger-dashboard.test.tsx src/features/entries/components/entry-input-form.test.tsx`
+
+Expected: 全件 PASS（entry-input-form 側は import 差し替えのみで挙動不変）。
+
+- [ ] **Step 7: 全テスト + lint + 型チェック**
+
+Run: `cd app && npm run test:run && npm run lint && npx tsc --noEmit`
+
+Expected: すべて成功。biome の import 順序エラーが出たら `npm run format` で修正して再実行。
+
+- [ ] **Step 8: Commit**
+
+```bash
+git add app/src/lib/date.ts app/src/features/entries/components/entry-input-form.tsx app/src/features/ledger/components/ledger-dashboard.tsx app/src/features/ledger/components/ledger-dashboard.test.tsx
+git commit -m "Replace edit dialog date input with shadcn calendar and share date utils"
+```
