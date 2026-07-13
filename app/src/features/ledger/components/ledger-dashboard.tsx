@@ -3,6 +3,7 @@
 import type { EntriesModel } from "@server/modules/entries/model";
 import type { SummaryModel } from "@server/modules/summary/model";
 import {
+  Calendar as CalendarIcon,
   ChevronLeft,
   ChevronRight,
   Loader2,
@@ -14,13 +15,21 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { ja } from "react-day-picker/locale";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Textarea } from "@/components/ui/textarea";
 import { expenseCategories } from "@/features/entries/utils/journal-preview";
 import { DailyTrendCard } from "@/features/ledger/components/daily-trend-card";
+import { formatDateLabel, formatDateString, parseDateString } from "@/lib/date";
 import { cn } from "@/lib/utils";
 
 type EditForm = {
@@ -121,6 +130,7 @@ export function LedgerDashboard({
     useState<EntriesModel.Item | null>(null);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [dateOpen, setDateOpen] = useState(false);
   const maxCategory = Math.max(
     1,
     ...summary.byCategory.map((item) => item.amount),
@@ -131,11 +141,13 @@ export function LedgerDashboard({
   const openEdit = (entry: EntriesModel.Item) => {
     setEditing(entry);
     setForm(initialEditForm(entry));
+    setDateOpen(false);
   };
 
   const closeEdit = () => {
     setEditing(null);
     setForm(null);
+    setDateOpen(false);
   };
 
   const updateForm = (patch: Partial<EditForm>) => {
@@ -447,13 +459,34 @@ export function LedgerDashboard({
                 >
                   稼働日
                 </label>
-                <Input
-                  className="bg-background font-mono"
-                  id="edit-date"
-                  onChange={(event) => updateForm({ date: event.target.value })}
-                  type="date"
-                  value={form.date}
-                />
+                <Popover onOpenChange={setDateOpen} open={dateOpen}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      className="w-full justify-start bg-background font-mono font-normal"
+                      id="edit-date"
+                      type="button"
+                      variant="outline"
+                    >
+                      <CalendarIcon className="size-4 text-muted-foreground" />
+                      {formatDateLabel(form.date)}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent align="start" className="w-auto p-0">
+                    <Calendar
+                      defaultMonth={parseDateString(form.date)}
+                      disabled={{ after: new Date() }}
+                      locale={ja}
+                      mode="single"
+                      onSelect={(date) => {
+                        if (date) {
+                          updateForm({ date: formatDateString(date) });
+                        }
+                        setDateOpen(false);
+                      }}
+                      selected={parseDateString(form.date)}
+                    />
+                  </PopoverContent>
+                </Popover>
               </div>
 
               <div>

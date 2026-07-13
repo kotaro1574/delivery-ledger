@@ -22,6 +22,12 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  formatDateLabel,
+  formatDateString,
+  parseDateString,
+  todayString,
+} from "@/lib/date";
 import { cn } from "@/lib/utils";
 import {
   buildJournalPreview,
@@ -47,19 +53,6 @@ type ReceiptOcrResponse = {
   memo: string;
   confidence: number;
 };
-
-function formatDateString(date: Date) {
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
-}
-
-function todayString() {
-  return formatDateString(new Date());
-}
-
-function parseDateString(value: string) {
-  const [year, month, day] = value.split("-").map(Number);
-  return new Date(year, month - 1, day);
-}
 
 function yen(value: number) {
   return `¥${Math.round(Number(value || 0)).toLocaleString("ja-JP")}`;
@@ -132,7 +125,6 @@ function isExpenseCategoryCode(value: string): boolean {
 
 export function EntryInputForm() {
   const router = useRouter();
-  const today = todayString();
   const [mode, setMode] = useState<EntryMode>("income");
   const [entryDate, setEntryDate] = useState(() => todayString());
   const [dateOpen, setDateOpen] = useState(false);
@@ -149,10 +141,7 @@ export function EntryInputForm() {
   const [analyzingReceipt, setAnalyzingReceipt] = useState(false);
   const [receipt, setReceipt] = useState<File | null>(null);
   const fileRef = useRef<HTMLInputElement | null>(null);
-  const dateLabel =
-    entryDate === today
-      ? `${entryDate.replaceAll("-", "/")}（今日）`
-      : entryDate.replaceAll("-", "/");
+  const dateLabel = formatDateLabel(entryDate);
   const amountNumber = Number.parseInt(amount || "0", 10);
   const selectedCategory =
     expenseCategories.find((category) => category.code === categoryCode) ??
