@@ -327,4 +327,82 @@ describe("LedgerDashboard", () => {
       }),
     );
   });
+
+  it("編集ダイアログの金額をカンマ区切りで表示する", async () => {
+    const fetchMock = vi.fn(async () => Response.json({ id: "entry-1" }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      <LedgerDashboard
+        month="2026-06"
+        summary={summary}
+        entries={[
+          {
+            id: "entry-1",
+            date: "2026-06-10",
+            kind: "income",
+            category: "売上高",
+            categoryCode: "501",
+            description: "夜ピーク",
+            amount: 8200,
+            deliveries: 8,
+            onlineMinutes: 270,
+            receiptKey: null,
+            businessAmount: null,
+            privateAmount: null,
+          },
+        ]}
+      />,
+    );
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "編集 夜ピーク" }),
+    );
+
+    expect(screen.getByLabelText("売上")).toHaveValue("8,200");
+
+    fireEvent.change(screen.getByLabelText("売上"), {
+      target: { value: "9400" },
+    });
+
+    expect(screen.getByLabelText("売上")).toHaveValue("9,400");
+  });
+
+  it("編集ダイアログの件数とオンライン時間の入力枠を同じ高さで表示する", async () => {
+    const fetchMock = vi.fn(async () => Response.json({ id: "entry-1" }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      <LedgerDashboard
+        month="2026-06"
+        summary={summary}
+        entries={[
+          {
+            id: "entry-1",
+            date: "2026-06-10",
+            kind: "income",
+            category: "売上高",
+            categoryCode: "501",
+            description: "夜ピーク",
+            amount: 8200,
+            deliveries: 8,
+            onlineMinutes: 270,
+            receiptKey: null,
+            businessAmount: null,
+            privateAmount: null,
+          },
+        ]}
+      />,
+    );
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "編集 夜ピーク" }),
+    );
+
+    expect(screen.getByLabelText("件数").parentElement).toHaveClass("h-12");
+    expect(screen.getByLabelText("時間").parentElement).toHaveClass("h-12");
+    expect(screen.getByLabelText("分").parentElement).toHaveClass("h-12");
+    expect(screen.getByText("時間")).toHaveClass("whitespace-nowrap");
+    expect(screen.getByText("分")).toHaveClass("whitespace-nowrap");
+  });
 });

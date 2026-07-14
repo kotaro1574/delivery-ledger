@@ -506,7 +506,11 @@ export function LedgerDashboard({
                       updateForm({ amount: numberOnly(event.target.value) })
                     }
                     placeholder="0"
-                    value={form.amount}
+                    value={
+                      form.amount
+                        ? Number(form.amount).toLocaleString("ja-JP")
+                        : ""
+                    }
                   />
                 </div>
               </div>
@@ -520,9 +524,9 @@ export function LedgerDashboard({
                     >
                       件数
                     </label>
-                    <div className="flex items-baseline rounded-lg border border-border bg-background px-3 py-2">
+                    <div className="flex h-12 items-center rounded-lg border border-border bg-background px-3 py-2">
                       <Input
-                        className="h-auto border-0 bg-transparent p-0 font-mono shadow-none focus-visible:ring-0"
+                        className="h-auto min-w-0 border-0 bg-transparent p-0 font-mono shadow-none focus-visible:ring-0"
                         id="edit-deliveries"
                         inputMode="numeric"
                         onChange={(event) =>
@@ -533,7 +537,9 @@ export function LedgerDashboard({
                         placeholder="0"
                         value={form.deliveries}
                       />
-                      <span className="text-xs text-muted-foreground">件</span>
+                      <span className="shrink-0 whitespace-nowrap text-xs text-muted-foreground">
+                        件
+                      </span>
                     </div>
                   </div>
                   <div>
@@ -542,11 +548,11 @@ export function LedgerDashboard({
                     </div>
                     <div className="grid grid-cols-2 gap-2">
                       <label
-                        className="flex items-baseline rounded-lg border border-border bg-background px-3 py-2"
+                        className="flex h-12 items-center rounded-lg border border-border bg-background px-3 py-2"
                         htmlFor="edit-online-hours"
                       >
                         <Input
-                          className="h-auto border-0 bg-transparent p-0 font-mono shadow-none focus-visible:ring-0"
+                          className="h-auto min-w-0 border-0 bg-transparent p-0 font-mono shadow-none focus-visible:ring-0"
                           id="edit-online-hours"
                           inputMode="numeric"
                           onChange={(event) =>
@@ -557,16 +563,16 @@ export function LedgerDashboard({
                           placeholder="0"
                           value={form.onlineHours}
                         />
-                        <span className="text-xs text-muted-foreground">
+                        <span className="shrink-0 whitespace-nowrap text-xs text-muted-foreground">
                           時間
                         </span>
                       </label>
                       <label
-                        className="flex items-baseline rounded-lg border border-border bg-background px-3 py-2"
+                        className="flex h-12 items-center rounded-lg border border-border bg-background px-3 py-2"
                         htmlFor="edit-online-minutes"
                       >
                         <Input
-                          className="h-auto border-0 bg-transparent p-0 font-mono shadow-none focus-visible:ring-0"
+                          className="h-auto min-w-0 border-0 bg-transparent p-0 font-mono shadow-none focus-visible:ring-0"
                           id="edit-online-minutes"
                           inputMode="numeric"
                           maxLength={2}
@@ -578,7 +584,7 @@ export function LedgerDashboard({
                           placeholder="0"
                           value={form.onlineMinutes}
                         />
-                        <span className="text-xs text-muted-foreground">
+                        <span className="shrink-0 whitespace-nowrap text-xs text-muted-foreground">
                           分
                         </span>
                       </label>
