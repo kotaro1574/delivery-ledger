@@ -45,6 +45,13 @@
 - 日付ヘルパーは `app/src/lib/date.ts` に抽出して両コンポーネントで共有する: `formatDateString(date: Date): string`、`todayString(): string`、`parseDateString(value: string): Date`、`formatDateLabel(value: string): string`（`YYYY/MM/DD`、今日なら `（今日）` サフィックス）。`entry-input-form.tsx` のローカル実装はこの共有版に置き換える。
 - 編集ダイアログは Radix Dialog ではなく `fixed inset-0 z-50` の自前オーバーレイ。PopoverContent は body へ portal され DOM 順で後になるため、同じ `z-50` でもカレンダーはダイアログの上に描画される（実装時に目視確認すること）。
 
+## 取引編集ダイアログのフォームスタイル統一（追補 2026-07-14）
+
+編集ダイアログの入力欄は入力フォームと同一の見た目・挙動にする:
+
+- 金額（売上/金額）の表示は `Number(value).toLocaleString("ja-JP")` によるカンマ区切り（空なら空文字、`onChange` は `numberOnly` で数字のみ保持）。
+- 件数・オンライン時間（時間/分）の枠は `flex h-12 items-center`、内側の `Input` は `min-w-0`、単位ラベル（件/時間/分）は `shrink-0 whitespace-nowrap`。入力フォームの実装が正。
+
 ## テスト
 
 `app/src/features/entries/components/entry-input-form.test.tsx` を更新する:

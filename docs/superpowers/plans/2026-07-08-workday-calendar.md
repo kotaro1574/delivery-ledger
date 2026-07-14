@@ -531,3 +531,224 @@ Expected: すべて成功。biome の import 順序エラーが出たら `npm ru
 git add app/src/lib/date.ts app/src/features/entries/components/entry-input-form.tsx app/src/features/ledger/components/ledger-dashboard.tsx app/src/features/ledger/components/ledger-dashboard.test.tsx
 git commit -m "Replace edit dialog date input with shadcn calendar and share date utils"
 ```
+
+---
+
+### Task 4: 取引編集ダイアログのフォームスタイルを入力フォームに統一（TDD）
+
+**Files:**
+- Modify: `app/src/features/ledger/components/ledger-dashboard.tsx`（金額のカンマ区切り表示、件数/オンライン時間の枠スタイル）
+- Test: `app/src/features/ledger/components/ledger-dashboard.test.tsx`
+
+**Interfaces:**
+- Consumes: 既存の `numberOnly` / `minuteOnly` / `updateForm`（変更しない）
+- Produces: なし（表示スタイルのみの変更。PATCH body は不変）
+
+参照実装: `app/src/features/entries/components/entry-input-form.tsx` の金額 input と 件数/時間/分 の枠。
+
+- [ ] **Step 1: 失敗するテストを追加する**
+
+`app/src/features/ledger/components/ledger-dashboard.test.tsx` の describe 内に以下の2テストを追加する（fixture は既存テストと同じ収入エントリを使う）:
+
+```tsx
+  it("編集ダイアログの金額をカンマ区切りで表示する", async () => {
+    const fetchMock = vi.fn(async () => Response.json({ id: "entry-1" }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      <LedgerDashboard
+        month="2026-06"
+        summary={summary}
+        entries={[
+          {
+            id: "entry-1",
+            date: "2026-06-10",
+            kind: "income",
+            category: "売上高",
+            categoryCode: "501",
+            description: "夜ピーク",
+            amount: 8200,
+            deliveries: 8,
+            onlineMinutes: 270,
+            receiptKey: null,
+            businessAmount: null,
+            privateAmount: null,
+          },
+        ]}
+      />,
+    );
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "編集 夜ピーク" }),
+    );
+
+    expect(screen.getByLabelText("売上")).toHaveValue("8,200");
+
+    fireEvent.change(screen.getByLabelText("売上"), {
+      target: { value: "9400" },
+    });
+
+    expect(screen.getByLabelText("売上")).toHaveValue("9,400");
+  });
+
+  it("編集ダイアログの件数とオンライン時間の入力枠を同じ高さで表示する", async () => {
+    const fetchMock = vi.fn(async () => Response.json({ id: "entry-1" }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      <LedgerDashboard
+        month="2026-06"
+        summary={summary}
+        entries={[
+          {
+            id: "entry-1",
+            date: "2026-06-10",
+            kind: "income",
+            category: "売上高",
+            categoryCode: "501",
+            description: "夜ピーク",
+            amount: 8200,
+            deliveries: 8,
+            onlineMinutes: 270,
+            receiptKey: null,
+            businessAmount: null,
+            privateAmount: null,
+          },
+        ]}
+      />,
+    );
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "編集 夜ピーク" }),
+    );
+
+    expect(screen.getByLabelText("件数").parentElement).toHaveClass("h-12");
+    expect(screen.getByLabelText("時間").parentElement).toHaveClass("h-12");
+    expect(screen.getByLabelText("分").parentElement).toHaveClass("h-12");
+    expect(screen.getByText("時間")).toHaveClass("whitespace-nowrap");
+    expect(screen.getByText("分")).toHaveClass("whitespace-nowrap");
+  });
+```
+
+注意: 既存テスト「収入取引を編集できる」は `fireEvent.change` で "9400" を入れて PATCH body の `amount: 9400` を検証している。`numberOnly` がカンマを剥がすため、この既存テストは無変更で PASS し続けること（変更してはいけない）。
+
+- [ ] **Step 2: テストが失敗することを確認**
+
+Run: `cd app && npm run test:run -- src/features/ledger/components/ledger-dashboard.test.tsx`
+
+Expected: 追加した2件が FAIL（`toHaveValue("8,200")` が生の "8200" と不一致 / `h-12`・`whitespace-nowrap` クラスが無い）。既存テストは PASS のまま。
+
+- [ ] **Step 3: 実装**
+
+`app/src/features/ledger/components/ledger-dashboard.tsx` を編集する。参照実装は entry-input-form.tsx。
+
+1. 金額 input（`id="edit-amount"`）の `value` をカンマ区切り表示に変更:
+
+```tsx
+                  <input
+                    className="w-full bg-transparent font-mono text-4xl font-bold outline-none placeholder:text-[#cfc7b4]"
+                    id="edit-amount"
+                    inputMode="numeric"
+                    onChange={(event) =>
+                      updateForm({ amount: numberOnly(event.target.value) })
+                    }
+                    placeholder="0"
+                    value={
+                      form.amount
+                        ? Number(form.amount).toLocaleString("ja-JP")
+                        : ""
+                    }
+                  />
+```
+
+2. 件数の枠（`id="edit-deliveries"` を包む div）を入力フォームと同じスタイルに変更:
+
+```tsx
+                    <div className="flex h-12 items-center rounded-lg border border-border bg-background px-3 py-2">
+                      <Input
+                        className="h-auto min-w-0 border-0 bg-transparent p-0 font-mono shadow-none focus-visible:ring-0"
+                        id="edit-deliveries"
+                        inputMode="numeric"
+                        onChange={(event) =>
+                          updateForm({
+                            deliveries: numberOnly(event.target.value),
+                          })
+                        }
+                        placeholder="0"
+                        value={form.deliveries}
+                      />
+                      <span className="shrink-0 whitespace-nowrap text-xs text-muted-foreground">
+                        件
+                      </span>
+                    </div>
+```
+
+3. 時間の枠（`htmlFor="edit-online-hours"` の label）を同様に変更:
+
+```tsx
+                      <label
+                        className="flex h-12 items-center rounded-lg border border-border bg-background px-3 py-2"
+                        htmlFor="edit-online-hours"
+                      >
+                        <Input
+                          className="h-auto min-w-0 border-0 bg-transparent p-0 font-mono shadow-none focus-visible:ring-0"
+                          id="edit-online-hours"
+                          inputMode="numeric"
+                          onChange={(event) =>
+                            updateForm({
+                              onlineHours: numberOnly(event.target.value),
+                            })
+                          }
+                          placeholder="0"
+                          value={form.onlineHours}
+                        />
+                        <span className="shrink-0 whitespace-nowrap text-xs text-muted-foreground">
+                          時間
+                        </span>
+                      </label>
+```
+
+4. 分の枠（`htmlFor="edit-online-minutes"` の label）を同様に変更:
+
+```tsx
+                      <label
+                        className="flex h-12 items-center rounded-lg border border-border bg-background px-3 py-2"
+                        htmlFor="edit-online-minutes"
+                      >
+                        <Input
+                          className="h-auto min-w-0 border-0 bg-transparent p-0 font-mono shadow-none focus-visible:ring-0"
+                          id="edit-online-minutes"
+                          inputMode="numeric"
+                          maxLength={2}
+                          onChange={(event) =>
+                            updateForm({
+                              onlineMinutes: minuteOnly(event.target.value),
+                            })
+                          }
+                          placeholder="0"
+                          value={form.onlineMinutes}
+                        />
+                        <span className="shrink-0 whitespace-nowrap text-xs text-muted-foreground">
+                          分
+                        </span>
+                      </label>
+```
+
+- [ ] **Step 4: 対象テストが通ることを確認**
+
+Run: `cd app && npm run test:run -- src/features/ledger/components/ledger-dashboard.test.tsx`
+
+Expected: 全件 PASS（既存テスト含む）。
+
+- [ ] **Step 5: 全テスト + lint + 型チェック**
+
+Run: `cd app && npm run test:run && npm run lint && npx tsc --noEmit`
+
+Expected: すべて成功。
+
+- [ ] **Step 6: Commit**
+
+```bash
+git add app/src/features/ledger/components/ledger-dashboard.tsx app/src/features/ledger/components/ledger-dashboard.test.tsx
+git commit -m "Align edit dialog amount formatting and field layout with entry form"
+```
