@@ -36,7 +36,7 @@
 
 - `npx shadcn@latest add calendar popover` を実行する。
   - 追加されるファイル: `src/components/ui/calendar.tsx`, `src/components/ui/popover.tsx`
-  - 追加される依存: `react-day-picker`, `@radix-ui/react-popover`
+  - 追加される依存: `react-day-picker`（v10 が入った）, `radix-ui`（CLI は scoped の `@radix-ui/react-popover` ではなくモノリスパッケージを追加した）
 
 ## 取引編集ダイアログ（追補 2026-07-12）
 

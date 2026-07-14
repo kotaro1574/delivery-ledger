@@ -59,11 +59,11 @@ function moveMonth(month: string, offset: number) {
 }
 
 function displayEntryDate(date: string) {
-  const [year, month, day] = date.split("-").map(Number);
+  const parsed = parseDateString(date);
   const weekdays = ["日", "月", "火", "水", "木", "金", "土"];
-  const weekday = weekdays[new Date(year, month - 1, day).getDay()];
+  const weekday = weekdays[parsed.getDay()];
 
-  return `${month}/${day}(${weekday})`;
+  return `${parsed.getMonth() + 1}/${parsed.getDate()}(${weekday})`;
 }
 
 function numberOnly(value: string) {

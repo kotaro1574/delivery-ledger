@@ -6,7 +6,7 @@
 
 **Architecture:** shadcn 公式 Date Picker パターン（Popover トリガーボタン + Calendar）を採用。`entryDate` state は `"YYYY-MM-DD"` 文字列のまま維持し、Calendar との境界でのみ Date オブジェクトに変換する。未来日は `disabled={{ after: today }}` で選択不可にする。
 
-**Tech Stack:** Next.js (App Router) / shadcn/ui (new-york style, Radix) / react-day-picker v9 / Vitest + Testing Library / Biome
+**Tech Stack:** Next.js (App Router) / shadcn/ui (new-york style, Radix) / react-day-picker v10 / Vitest + Testing Library / Biome
 
 ## Global Constraints
 
