@@ -15,10 +15,13 @@ describe("EntryInputForm", () => {
   afterEach(() => {
     vi.restoreAllMocks();
     vi.unstubAllGlobals();
+    vi.useRealTimers();
     pushMock.mockReset();
   });
 
   it("選択した稼働日を収入保存のdateとして送信する", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date(2026, 5, 15));
     const fetchMock = vi.fn(
       async (_input: RequestInfo | URL, _init?: RequestInit) =>
         Response.json({ id: "entry-1" }),
@@ -27,9 +30,17 @@ describe("EntryInputForm", () => {
 
     render(<EntryInputForm />);
 
-    fireEvent.change(screen.getByLabelText("稼働日"), {
-      target: { value: "2026-06-04" },
-    });
+    await userEvent.click(screen.getByLabelText("稼働日"));
+    const dayButton = screen
+      .getAllByRole("button")
+      .filter(
+        (button): button is HTMLButtonElement =>
+          button instanceof HTMLButtonElement,
+      )
+      .find((button) => button.textContent === "4" && !button.disabled);
+    expect(dayButton).toBeDefined();
+    await userEvent.click(dayButton as HTMLButtonElement);
+
     fireEvent.change(screen.getByLabelText(/売上/), {
       target: { value: "8200" },
     });
@@ -46,7 +57,22 @@ describe("EntryInputForm", () => {
       date: "2026-06-04",
       amount: 8200,
     });
-    expect(screen.getByLabelText("稼働日")).toHaveValue("2026-06-04");
+    expect(screen.getByLabelText("稼働日")).toHaveTextContent("2026/06/04");
+  });
+
+  it("未来の日付はカレンダーで選択できない", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date(2026, 5, 15));
+
+    render(<EntryInputForm />);
+
+    await userEvent.click(screen.getByLabelText("稼働日"));
+    const tomorrowButton = screen
+      .getAllByRole("button")
+      .find((button) => button.textContent === "16");
+
+    expect(tomorrowButton).toBeDefined();
+    expect(tomorrowButton).toBeDisabled();
   });
 
   it("時間と分からオンライン分数を送信する", async () => {
@@ -229,7 +255,7 @@ describe("EntryInputForm", () => {
     await waitFor(() =>
       expect(screen.getByLabelText("金額")).toHaveValue("2,350"),
     );
-    expect(screen.getByLabelText("稼働日")).toHaveValue("2026-06-10");
+    expect(screen.getByLabelText("稼働日")).toHaveTextContent("2026/06/10");
     expect(screen.getByPlaceholderText("メモ（任意）")).toHaveValue(
       "ENEOS レギュラーガソリン",
     );

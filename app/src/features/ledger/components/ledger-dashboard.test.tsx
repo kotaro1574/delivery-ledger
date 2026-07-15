@@ -26,6 +26,8 @@ const summary = {
 describe("LedgerDashboard", () => {
   afterEach(() => {
     vi.restoreAllMocks();
+    vi.unstubAllGlobals();
+    vi.useRealTimers();
   });
 
   it("収入取引を編集できる", async () => {
@@ -262,5 +264,145 @@ describe("LedgerDashboard", () => {
     expect(
       screen.getByLabelText("2026年6月の日別収支トレンド"),
     ).toBeInTheDocument();
+  });
+
+  it("編集ダイアログのカレンダーで稼働日を変更してPATCHに送信する", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date(2026, 5, 15));
+    const fetchMock = vi.fn(async () => Response.json({ id: "entry-1" }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      <LedgerDashboard
+        month="2026-06"
+        summary={summary}
+        entries={[
+          {
+            id: "entry-1",
+            date: "2026-06-10",
+            kind: "income",
+            category: "売上高",
+            categoryCode: "501",
+            description: "夜ピーク",
+            amount: 8200,
+            deliveries: 8,
+            onlineMinutes: 270,
+            receiptKey: null,
+            businessAmount: null,
+            privateAmount: null,
+          },
+        ]}
+      />,
+    );
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "編集 夜ピーク" }),
+    );
+    await userEvent.click(screen.getByLabelText("稼働日"));
+    const dayButton = screen
+      .getAllByRole("button")
+      .filter(
+        (button): button is HTMLButtonElement =>
+          button instanceof HTMLButtonElement,
+      )
+      .find((button) => button.textContent === "4" && !button.disabled);
+    expect(dayButton).toBeDefined();
+    await userEvent.click(dayButton as HTMLButtonElement);
+    expect(screen.getByLabelText("稼働日")).toHaveTextContent("2026/06/04");
+    await userEvent.click(screen.getByRole("button", { name: "更新する" }));
+
+    await waitFor(() => expect(fetchMock).toHaveBeenCalled());
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/entries/entry-1",
+      expect.objectContaining({
+        method: "PATCH",
+        body: JSON.stringify({
+          kind: "income",
+          date: "2026-06-04",
+          amount: 8200,
+          deliveries: 8,
+          onlineMinutes: 270,
+          memo: "夜ピーク",
+        }),
+      }),
+    );
+  });
+
+  it("編集ダイアログの金額をカンマ区切りで表示する", async () => {
+    const fetchMock = vi.fn(async () => Response.json({ id: "entry-1" }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      <LedgerDashboard
+        month="2026-06"
+        summary={summary}
+        entries={[
+          {
+            id: "entry-1",
+            date: "2026-06-10",
+            kind: "income",
+            category: "売上高",
+            categoryCode: "501",
+            description: "夜ピーク",
+            amount: 8200,
+            deliveries: 8,
+            onlineMinutes: 270,
+            receiptKey: null,
+            businessAmount: null,
+            privateAmount: null,
+          },
+        ]}
+      />,
+    );
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "編集 夜ピーク" }),
+    );
+
+    expect(screen.getByLabelText("売上")).toHaveValue("8,200");
+
+    fireEvent.change(screen.getByLabelText("売上"), {
+      target: { value: "9400" },
+    });
+
+    expect(screen.getByLabelText("売上")).toHaveValue("9,400");
+  });
+
+  it("編集ダイアログの件数とオンライン時間の入力枠を同じ高さで表示する", async () => {
+    const fetchMock = vi.fn(async () => Response.json({ id: "entry-1" }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      <LedgerDashboard
+        month="2026-06"
+        summary={summary}
+        entries={[
+          {
+            id: "entry-1",
+            date: "2026-06-10",
+            kind: "income",
+            category: "売上高",
+            categoryCode: "501",
+            description: "夜ピーク",
+            amount: 8200,
+            deliveries: 8,
+            onlineMinutes: 270,
+            receiptKey: null,
+            businessAmount: null,
+            privateAmount: null,
+          },
+        ]}
+      />,
+    );
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "編集 夜ピーク" }),
+    );
+
+    expect(screen.getByLabelText("件数").parentElement).toHaveClass("h-12");
+    expect(screen.getByLabelText("時間").parentElement).toHaveClass("h-12");
+    expect(screen.getByLabelText("分").parentElement).toHaveClass("h-12");
+    expect(screen.getByText("時間")).toHaveClass("whitespace-nowrap");
+    expect(screen.getByText("分")).toHaveClass("whitespace-nowrap");
   });
 });

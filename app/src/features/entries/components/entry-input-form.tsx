@@ -1,13 +1,33 @@
 "use client";
 
-import { Camera, Check, ChevronDown, Loader2, ScanText } from "lucide-react";
+import {
+  Calendar as CalendarIcon,
+  Camera,
+  Check,
+  ChevronDown,
+  Loader2,
+  ScanText,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useMemo, useRef, useState } from "react";
+import { ja } from "react-day-picker/locale";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  formatDateLabel,
+  formatDateString,
+  parseDateString,
+  todayString,
+} from "@/lib/date";
 import { cn } from "@/lib/utils";
 import {
   buildJournalPreview,
@@ -33,11 +53,6 @@ type ReceiptOcrResponse = {
   memo: string;
   confidence: number;
 };
-
-function todayString() {
-  const date = new Date();
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
-}
 
 function yen(value: number) {
   return `¥${Math.round(Number(value || 0)).toLocaleString("ja-JP")}`;
@@ -110,9 +125,9 @@ function isExpenseCategoryCode(value: string): boolean {
 
 export function EntryInputForm() {
   const router = useRouter();
-  const today = todayString();
   const [mode, setMode] = useState<EntryMode>("income");
   const [entryDate, setEntryDate] = useState(() => todayString());
+  const [dateOpen, setDateOpen] = useState(false);
   const [amount, setAmount] = useState("");
   const [categoryCode, setCategoryCode] = useState("601");
   const [deliveries, setDeliveries] = useState("");
@@ -126,10 +141,7 @@ export function EntryInputForm() {
   const [analyzingReceipt, setAnalyzingReceipt] = useState(false);
   const [receipt, setReceipt] = useState<File | null>(null);
   const fileRef = useRef<HTMLInputElement | null>(null);
-  const dateLabel =
-    entryDate === today
-      ? `${entryDate.replaceAll("-", "/")}（今日）`
-      : entryDate.replaceAll("-", "/");
+  const dateLabel = formatDateLabel(entryDate);
   const amountNumber = Number.parseInt(amount || "0", 10);
   const selectedCategory =
     expenseCategories.find((category) => category.code === categoryCode) ??
@@ -332,16 +344,35 @@ export function EntryInputForm() {
           >
             稼働日
           </label>
-          <Input
-            className="bg-background font-mono"
-            id="entry-date"
-            onChange={(event) => {
-              setEntryDate(event.target.value);
-              setSaved(false);
-            }}
-            type="date"
-            value={entryDate}
-          />
+          <Popover onOpenChange={setDateOpen} open={dateOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                className="w-full justify-start bg-background font-mono font-normal"
+                id="entry-date"
+                type="button"
+                variant="outline"
+              >
+                <CalendarIcon className="size-4 text-muted-foreground" />
+                {dateLabel}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent align="start" className="w-auto p-0">
+              <Calendar
+                defaultMonth={parseDateString(entryDate)}
+                disabled={{ after: new Date() }}
+                locale={ja}
+                mode="single"
+                onSelect={(date) => {
+                  if (date) {
+                    setEntryDate(formatDateString(date));
+                    setSaved(false);
+                  }
+                  setDateOpen(false);
+                }}
+                selected={parseDateString(entryDate)}
+              />
+            </PopoverContent>
+          </Popover>
         </div>
 
         <label
