@@ -32,6 +32,7 @@ export namespace SummaryModel {
       perDelivery: z.number(),
       deliveries: z.number(),
       onlineHours: z.number(),
+      workDays: z.number(),
     }),
   });
   export type Response = z.infer<typeof Response>;

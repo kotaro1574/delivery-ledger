@@ -15,6 +15,7 @@ describe("SummaryModel", () => {
           perDelivery: 0,
           deliveries: 0,
           onlineHours: 0,
+          workDays: 0,
         },
       }),
     ).toEqual({
@@ -28,6 +29,7 @@ describe("SummaryModel", () => {
         perDelivery: 0,
         deliveries: 0,
         onlineHours: 0,
+        workDays: 0,
       },
     });
   });

@@ -2,6 +2,7 @@ export type MetricInput = {
   revenue: number;
   deliveries: number;
   onlineMinutes: number;
+  workDays: number;
 };
 
 export type SummaryMetrics = {
@@ -9,6 +10,7 @@ export type SummaryMetrics = {
   perDelivery: number;
   deliveries: number;
   onlineHours: number;
+  workDays: number;
 };
 
 export function calculateMetrics(input: MetricInput): SummaryMetrics {
@@ -23,5 +25,6 @@ export function calculateMetrics(input: MetricInput): SummaryMetrics {
       input.deliveries > 0 ? Math.round(input.revenue / input.deliveries) : 0,
     deliveries: input.deliveries,
     onlineHours,
+    workDays: input.workDays,
   };
 }

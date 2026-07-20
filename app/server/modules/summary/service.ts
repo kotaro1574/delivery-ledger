@@ -132,19 +132,28 @@ export const SummaryService = {
       }),
       { deliveries: 0, onlineMinutes: 0 },
     );
-    const legacyStats = legacyStatsRows
-      .filter((row) => !detailDatesWithStats.has(row.date))
-      .reduce(
-        (total, row) => ({
-          deliveries: total.deliveries + (row.deliveries ?? 0),
-          onlineMinutes: total.onlineMinutes + (row.onlineMinutes ?? 0),
-        }),
-        { deliveries: 0, onlineMinutes: 0 },
-      );
+    const legacyRows = legacyStatsRows.filter(
+      (row) => !detailDatesWithStats.has(row.date),
+    );
+    const legacyStats = legacyRows.reduce(
+      (total, row) => ({
+        deliveries: total.deliveries + (row.deliveries ?? 0),
+        onlineMinutes: total.onlineMinutes + (row.onlineMinutes ?? 0),
+      }),
+      { deliveries: 0, onlineMinutes: 0 },
+    );
     const stats = {
       deliveries: detailStats.deliveries + legacyStats.deliveries,
       onlineMinutes: detailStats.onlineMinutes + legacyStats.onlineMinutes,
     };
+    const workDays = new Set([
+      ...detailStatsRows.map((row) => row.date),
+      ...legacyRows
+        .filter(
+          (row) => (row.deliveries ?? 0) > 0 || (row.onlineMinutes ?? 0) > 0,
+        )
+        .map((row) => row.date),
+    ]).size;
 
     return {
       revenue,
@@ -156,6 +165,7 @@ export const SummaryService = {
         revenue,
         deliveries: stats.deliveries ?? 0,
         onlineMinutes: stats.onlineMinutes ?? 0,
+        workDays,
       }),
     };
   },

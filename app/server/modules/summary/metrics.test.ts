@@ -8,12 +8,14 @@ describe("calculateMetrics", () => {
         revenue: 12000,
         deliveries: 24,
         onlineMinutes: 360,
+        workDays: 5,
       }),
     ).toEqual({
       wagePerHour: 2000,
       perDelivery: 500,
       deliveries: 24,
       onlineHours: 6,
+      workDays: 5,
     });
   });
 
@@ -23,12 +25,14 @@ describe("calculateMetrics", () => {
         revenue: 12000,
         deliveries: 0,
         onlineMinutes: 0,
+        workDays: 0,
       }),
     ).toEqual({
       wagePerHour: 0,
       perDelivery: 0,
       deliveries: 0,
       onlineHours: 0,
+      workDays: 0,
     });
   });
 });

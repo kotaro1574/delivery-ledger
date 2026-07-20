@@ -20,6 +20,7 @@ const summary = {
     perDelivery: 1025,
     deliveries: 8,
     onlineHours: 4.5,
+    workDays: 12,
   },
 };
 
