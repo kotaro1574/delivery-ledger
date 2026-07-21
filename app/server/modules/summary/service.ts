@@ -9,6 +9,7 @@ import {
 import { and, eq, like, sql } from "drizzle-orm";
 import { calculateMetrics } from "./metrics";
 import type { SummaryModel } from "./model";
+import { countWorkDays } from "./work-days";
 import { buildYearlySummary } from "./yearly";
 
 export const SummaryService = {
@@ -146,14 +147,10 @@ export const SummaryService = {
       deliveries: detailStats.deliveries + legacyStats.deliveries,
       onlineMinutes: detailStats.onlineMinutes + legacyStats.onlineMinutes,
     };
-    const workDays = new Set([
-      ...detailStatsRows.map((row) => row.date),
-      ...legacyRows
-        .filter(
-          (row) => (row.deliveries ?? 0) > 0 || (row.onlineMinutes ?? 0) > 0,
-        )
-        .map((row) => row.date),
-    ]).size;
+    const workDays = countWorkDays({
+      detailDates: detailStatsRows.map((row) => row.date),
+      legacyStats: legacyRows,
+    });
 
     return {
       revenue,
