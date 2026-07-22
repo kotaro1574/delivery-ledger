@@ -340,9 +340,6 @@ export function LedgerDashboard({
           <div className="font-mono text-2xl font-bold">
             {yen(summary.metrics.wagePerHour)}
           </div>
-          <div className="mt-1 text-xs text-muted-foreground">
-            オンライン {summary.metrics.onlineHours}時間
-          </div>
         </Card>
         <Card className="border-border bg-[#fffdf7] p-5">
           <div className="mb-2 text-xs tracking-widest text-muted-foreground">
@@ -353,6 +350,22 @@ export function LedgerDashboard({
           </div>
           <div className="mt-1 text-xs text-muted-foreground">
             {summary.metrics.deliveries}件
+          </div>
+        </Card>
+        <Card className="border-border bg-[#fffdf7] p-5">
+          <div className="mb-2 text-xs tracking-widest text-muted-foreground">
+            稼働日数
+          </div>
+          <div className="font-mono text-2xl font-bold">
+            {summary.metrics.workDays}日
+          </div>
+        </Card>
+        <Card className="border-border bg-[#fffdf7] p-5">
+          <div className="mb-2 text-xs tracking-widest text-muted-foreground">
+            稼働時間
+          </div>
+          <div className="font-mono text-2xl font-bold">
+            {summary.metrics.onlineHours}時間
           </div>
         </Card>
       </section>
