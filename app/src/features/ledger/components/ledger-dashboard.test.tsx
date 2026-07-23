@@ -20,6 +20,7 @@ const summary = {
     perDelivery: 1025,
     deliveries: 8,
     onlineHours: 4.5,
+    workDays: 12,
   },
 };
 
@@ -404,5 +405,15 @@ describe("LedgerDashboard", () => {
     expect(screen.getByLabelText("分").parentElement).toHaveClass("h-12");
     expect(screen.getByText("時間")).toHaveClass("whitespace-nowrap");
     expect(screen.getByText("分")).toHaveClass("whitespace-nowrap");
+  });
+
+  it("稼働日数と稼働時間を表示する", () => {
+    render(<LedgerDashboard entries={[]} month="2026-06" summary={summary} />);
+
+    expect(screen.getByText("稼働日数")).toBeInTheDocument();
+    expect(screen.getByText("12日")).toBeInTheDocument();
+    expect(screen.getByText("稼働時間")).toBeInTheDocument();
+    expect(screen.getByText("4.5時間")).toBeInTheDocument();
+    expect(screen.queryByText("オンライン 4.5時間")).not.toBeInTheDocument();
   });
 });
