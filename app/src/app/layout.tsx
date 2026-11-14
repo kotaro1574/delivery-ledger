@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 
@@ -8,6 +8,15 @@ export const metadata: Metadata = {
     template: "%s | 配達収支台帳",
   },
   description: "Uber Eats 配達パートナー向けの収支管理アプリ",
+  applicationName: "配達収支台帳",
+  appleWebApp: {
+    title: "収支台帳",
+    statusBarStyle: "default",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#f3efe6",
 };
 
 export default function RootLayout({
