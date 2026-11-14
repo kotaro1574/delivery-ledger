@@ -257,7 +257,10 @@ describe("LedgerDashboard", () => {
     expect(screen.getByText("DAILY TREND")).toBeInTheDocument();
     expect(screen.getByText("日別収支トレンド")).toBeInTheDocument();
     expect(screen.getByText("最高利益日")).toBeInTheDocument();
-    expect(screen.getAllByText("6/9").length).toBeGreaterThanOrEqual(2);
+    expect(screen.getByText("6/9")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "6/9(火)の収支詳細" }),
+    ).toBeInTheDocument();
     expect(screen.getByText("平均利益")).toBeInTheDocument();
     expect(screen.getByText("¥4,918")).toBeInTheDocument();
     expect(screen.getByText("経費率")).toBeInTheDocument();

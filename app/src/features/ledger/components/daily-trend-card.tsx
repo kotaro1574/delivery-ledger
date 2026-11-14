@@ -1,24 +1,23 @@
 "use client";
 
 import type { EntriesModel } from "@server/modules/entries/model";
-import { type FocusEvent, type PointerEvent, useState } from "react";
+import { useState } from "react";
 import { Card } from "@/components/ui/card";
-import { buildDailyTrend } from "@/features/ledger/utils/daily-trend";
+import {
+  buildAmountAxis,
+  buildDailyTrend,
+  buildProfitSegments,
+  compactAmount,
+  type DailyTrendPoint,
+  isActiveDay,
+} from "@/features/ledger/utils/daily-trend";
+import { cn } from "@/lib/utils";
+
+const SATURDAY = 6;
+const SUNDAY = 0;
 
 function yen(value: number) {
   return `¥${Math.round(value).toLocaleString("ja-JP")}`;
-}
-
-function compactYen(value: number) {
-  const rounded = Math.round(value);
-  const sign = rounded < 0 ? "-" : "";
-  const absolute = Math.abs(rounded);
-
-  if (absolute >= 10_000) {
-    return `${sign}¥${Math.round(absolute / 1000)}k`;
-  }
-
-  return `${sign}¥${absolute.toLocaleString("ja-JP")}`;
 }
 
 function displayMonth(month: string) {
@@ -26,8 +25,86 @@ function displayMonth(month: string) {
   return `${year}年${Number(rawMonth)}月`;
 }
 
-function clamp(value: number, min: number, max: number) {
-  return Math.min(Math.max(value, min), max);
+function weekdayColor(weekday: number) {
+  if (weekday === SATURDAY) {
+    return "text-[var(--ledger-saturday)]";
+  }
+
+  if (weekday === SUNDAY) {
+    return "text-[var(--ledger-sunday)]";
+  }
+
+  return "text-muted-foreground";
+}
+
+function centerPressedDay(node: HTMLDivElement | null) {
+  const pressed = node?.querySelector<HTMLElement>('[aria-pressed="true"]');
+
+  if (!node || !pressed) {
+    return;
+  }
+
+  node.scrollLeft =
+    pressed.offsetLeft - (node.clientWidth - pressed.offsetWidth) / 2;
+}
+
+function DayDetail({ point }: { point: DailyTrendPoint }) {
+  const active = isActiveDay(point);
+
+  return (
+    <div
+      aria-live="polite"
+      className="border-t border-border bg-[#fffdf7] px-4 py-3"
+      data-testid="daily-trend-detail"
+    >
+      <div className="flex items-baseline justify-between gap-3">
+        <div className="font-mono text-base font-bold">
+          {point.label}
+          <span
+            className={cn(
+              "ml-1 font-sans text-xs",
+              weekdayColor(point.weekday),
+            )}
+          >
+            ({point.weekdayLabel})
+          </span>
+        </div>
+        <div className="text-[10px] font-bold text-muted-foreground">
+          日付をタップで切り替え
+        </div>
+      </div>
+      {active ? (
+        <dl className="mt-2 grid grid-cols-3 gap-2">
+          <div>
+            <dt className="text-[10px] font-bold tracking-widest text-muted-foreground">
+              売上
+            </dt>
+            <dd className="font-mono text-sm font-bold text-[var(--ledger-income)]">
+              {yen(point.revenue)}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-[10px] font-bold tracking-widest text-muted-foreground">
+              事業経費
+            </dt>
+            <dd className="font-mono text-sm font-bold text-[var(--ledger-expense)]">
+              {yen(point.expense)}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-[10px] font-bold tracking-widest text-muted-foreground">
+              利益
+            </dt>
+            <dd className="font-mono text-sm font-bold">{yen(point.profit)}</dd>
+          </div>
+        </dl>
+      ) : (
+        <p className="mt-2 text-xs font-bold text-muted-foreground">
+          この日の記録はありません
+        </p>
+      )}
+    </div>
+  );
 }
 
 export function DailyTrendCard({
@@ -37,96 +114,24 @@ export function DailyTrendCard({
   month: string;
   entries: EntriesModel.Item[];
 }) {
-  const [activeDate, setActiveDate] = useState<string | null>(null);
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const trend = buildDailyTrend(month, entries);
-  const hasData = trend.points.some(
-    (point) => point.revenue > 0 || point.expense > 0,
+  const activePoints = trend.points.filter(isActiveDay);
+  const selectedPoint =
+    trend.points.find((point) => point.date === selectedDate) ??
+    activePoints.at(-1) ??
+    null;
+  const axis = buildAmountAxis(
+    trend.points.flatMap((point) => [
+      point.revenue,
+      point.expense,
+      point.profit,
+    ]),
   );
-  const chart = {
-    width: 1080,
-    height: 280,
-    left: 40,
-    right: 18,
-    top: 22,
-    bottom: 42,
-  };
-  const chartWidth = chart.width - chart.left - chart.right;
-  const chartHeight = chart.height - chart.top - chart.bottom;
-  const values = trend.points.flatMap((point) => [
-    point.revenue,
-    point.expense,
-    point.profit,
-  ]);
-  const maxValue = Math.max(1, ...values);
-  const minValue = Math.min(0, ...values);
-  const range = Math.max(1, maxValue - minValue);
-  const scaleY = (value: number) =>
-    chart.top + ((maxValue - value) / range) * chartHeight;
-  const scaleX = (index: number) =>
-    trend.points.length > 1
-      ? chart.left + (index / (trend.points.length - 1)) * chartWidth
-      : chart.left + chartWidth / 2;
-  const zeroY = scaleY(0);
-  const barWidth = Math.max(
-    3,
-    Math.min(10, chartWidth / trend.points.length / 3),
-  );
-  const profitLine = trend.points
-    .map((point, index) => `${scaleX(index)},${scaleY(point.profit)}`)
-    .join(" ");
-  const tickValues = Array.from(
-    new Set([maxValue, Math.round((maxValue + minValue) / 2), 0, minValue]),
-  );
-  const interactivePoints = trend.points
-    .map((point, index) => {
-      const x = scaleX(index);
-      const y = scaleY(point.profit);
-
-      return {
-        ...point,
-        x,
-        y,
-        xPercent: (x / chart.width) * 100,
-        yPercent: (y / chart.height) * 100,
-      };
-    })
-    .filter((point) => point.revenue > 0 || point.expense > 0);
-  const activePoint =
-    interactivePoints.find((point) => point.date === activeDate) ?? null;
-  const tooltipAbove = (activePoint?.yPercent ?? 0) > 52;
-  const tooltipTop = activePoint
-    ? tooltipAbove
-      ? clamp(activePoint.yPercent - 8, 30, 76)
-      : clamp(activePoint.yPercent + 8, 20, 64)
-    : 0;
-
-  const handleBlur = (event: FocusEvent<HTMLFieldSetElement>) => {
-    const nextTarget = event.relatedTarget;
-
-    if (
-      !(nextTarget instanceof Node) ||
-      !event.currentTarget.contains(nextTarget)
-    ) {
-      setActiveDate(null);
-    }
-  };
-  const selectNearestPoint = (clientX: number, target: HTMLButtonElement) => {
-    const rect = target.getBoundingClientRect();
-
-    if (rect.width <= 0 || interactivePoints.length === 0) {
-      return;
-    }
-
-    const svgX = clamp((clientX - rect.left) / rect.width, 0, 1) * chart.width;
-    const nearest = interactivePoints.reduce((closest, point) =>
-      Math.abs(point.x - svgX) < Math.abs(closest.x - svgX) ? point : closest,
-    );
-
-    setActiveDate(nearest.date);
-  };
-  const handlePointerSelect = (event: PointerEvent<HTMLButtonElement>) => {
-    selectNearestPoint(event.clientX, event.currentTarget);
-  };
+  const range = axis.max - axis.min;
+  const percent = (value: number) => ((value - axis.min) / range) * 100;
+  const zeroPercent = percent(0);
+  const segments = buildProfitSegments(trend.points);
 
   return (
     <section>
@@ -155,7 +160,7 @@ export function DailyTrendCard({
         </div>
       </div>
 
-      <Card className="overflow-hidden border-border bg-card p-0">
+      <Card className="gap-0 overflow-hidden border-border bg-card p-0">
         <div className="grid grid-cols-3 border-b border-border bg-[#fffdf7]">
           <div className="border-r border-border p-3 sm:p-4">
             <div className="mb-1 text-[10px] tracking-widest text-muted-foreground sm:text-xs">
@@ -163,6 +168,11 @@ export function DailyTrendCard({
             </div>
             <div className="font-mono text-xl font-bold sm:text-2xl">
               {trend.bestProfitDay?.label ?? "-"}
+              {trend.bestProfitDay ? (
+                <span className="ml-0.5 font-sans text-[10px] text-muted-foreground sm:text-xs">
+                  ({trend.bestProfitDay.weekdayLabel})
+                </span>
+              ) : null}
             </div>
             <div className="mt-1 text-[10px] font-bold text-muted-foreground sm:text-xs">
               {yen(trend.bestProfitDay?.profit ?? 0)}
@@ -192,175 +202,183 @@ export function DailyTrendCard({
           </div>
         </div>
 
-        {hasData ? (
-          <div
-            className="overflow-x-auto px-4 py-5 sm:p-5"
-            data-testid="daily-trend-scroll"
-            onScroll={() => setActiveDate(null)}
-          >
-            <fieldset
-              className="relative m-0 min-w-[64rem] border-0 p-0"
-              data-testid="daily-trend-chart-area"
-              onBlur={handleBlur}
-              onPointerLeave={() => setActiveDate(null)}
-            >
-              <legend className="sr-only">日別収支詳細</legend>
-              <svg
-                aria-label={`${displayMonth(month)}の日別収支トレンド`}
-                className="h-72 w-full overflow-visible"
-                role="img"
-                viewBox={`0 0 ${chart.width} ${chart.height}`}
-              >
-                {tickValues.map((value) => {
-                  const y = scaleY(value);
-                  return (
-                    <g key={value}>
-                      <line
-                        stroke="rgb(222 216 201)"
-                        strokeDasharray={value === 0 ? "0" : "4 6"}
-                        x1={chart.left}
-                        x2={chart.width - chart.right}
-                        y1={y}
-                        y2={y}
-                      />
-                      <text
-                        fill="rgb(122 116 101)"
-                        fontSize="11"
-                        fontWeight="700"
-                        textAnchor="end"
-                        x={chart.left - 8}
-                        y={y + 4}
-                      >
-                        {value === 0 ? "0" : compactYen(value)}
-                      </text>
-                    </g>
-                  );
-                })}
-
-                {trend.points.map((point, index) => {
-                  const x = scaleX(index);
-                  const revenueY = scaleY(point.revenue);
-                  const expenseY = scaleY(point.expense);
-
-                  return (
-                    <g key={point.date}>
-                      <rect
-                        fill="var(--ledger-income)"
-                        height={Math.abs(zeroY - revenueY)}
-                        opacity={point.revenue > 0 ? 0.82 : 0}
-                        rx="2"
-                        width={barWidth}
-                        x={x - barWidth - 1}
-                        y={Math.min(zeroY, revenueY)}
-                      />
-                      <rect
-                        fill="var(--ledger-expense)"
-                        height={Math.abs(zeroY - expenseY)}
-                        opacity={point.expense > 0 ? 0.7 : 0}
-                        rx="2"
-                        width={barWidth}
-                        x={x + 1}
-                        y={Math.min(zeroY, expenseY)}
-                      />
-                      <text
-                        fill="rgb(122 116 101)"
-                        fontSize="10"
-                        fontWeight="700"
-                        textAnchor="middle"
-                        x={x}
-                        y={chart.height - 12}
-                      >
-                        {point.label}
-                      </text>
-                    </g>
-                  );
-                })}
-
-                <polyline
-                  fill="none"
-                  points={profitLine}
-                  stroke="rgb(35 32 27)"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="3"
-                />
-                {trend.points.map((point, index) =>
-                  point.revenue > 0 || point.expense > 0 ? (
-                    <circle
-                      cx={scaleX(index)}
-                      cy={scaleY(point.profit)}
-                      fill="#fffdf7"
-                      key={point.date}
-                      r="4"
-                      stroke="rgb(35 32 27)"
-                      strokeWidth="2"
-                    />
-                  ) : null,
-                )}
-              </svg>
-
-              <button
-                aria-describedby={
-                  activePoint ? "daily-trend-popover" : undefined
-                }
-                aria-label={`${displayMonth(month)}の日別収支詳細を表示`}
-                className="absolute inset-0 z-10 cursor-crosshair rounded-lg bg-transparent outline-none focus-visible:ring-2 focus-visible:ring-ring/35"
-                onClick={handlePointerSelect}
-                onFocus={() =>
-                  setActiveDate(interactivePoints[0]?.date ?? null)
-                }
-                onPointerMove={handlePointerSelect}
-                type="button"
-              />
-
-              <div className="sr-only">
-                {interactivePoints.map((point) => (
-                  <button
-                    aria-describedby={
-                      activePoint?.date === point.date
-                        ? "daily-trend-popover"
-                        : undefined
-                    }
-                    aria-label={`${point.label}の収支詳細`}
-                    key={point.date}
-                    onClick={() => setActiveDate(point.date)}
-                    onFocus={() => setActiveDate(point.date)}
-                    type="button"
-                  />
-                ))}
+        {selectedPoint ? (
+          <>
+            <div className="flex">
+              <div aria-hidden="true" className="w-11 shrink-0 pt-4">
+                <div className="relative h-48">
+                  {axis.ticks.map((tick) => (
+                    <span
+                      className="absolute right-1.5 translate-y-1/2 font-mono text-[10px] font-bold leading-none text-muted-foreground"
+                      key={tick}
+                      style={{ bottom: `${percent(tick)}%` }}
+                    >
+                      {compactAmount(tick)}
+                    </span>
+                  ))}
+                </div>
+                <div className="pt-2 pr-1.5 text-right text-[10px] font-bold text-muted-foreground">
+                  {Number(month.slice(5))}月
+                </div>
               </div>
 
-              {activePoint ? (
-                <div
-                  className="pointer-events-none absolute z-20 min-w-40 rounded-lg border border-border bg-[#fffdf7] p-3 text-xs font-bold shadow-lg"
-                  id="daily-trend-popover"
-                  role="tooltip"
-                  style={{
-                    left: `${clamp(activePoint.xPercent, 24, 76)}%`,
-                    top: `${tooltipTop}%`,
-                    transform: tooltipAbove
-                      ? "translate(-50%, -100%)"
-                      : "translate(-50%, 0)",
-                  }}
+              <div
+                className="min-w-0 flex-1 overflow-x-auto overscroll-x-contain border-l border-border pt-4"
+                data-testid="daily-trend-scroll"
+                key={month}
+                ref={centerPressedDay}
+              >
+                <fieldset
+                  aria-label={`${displayMonth(month)}の日別収支トレンド`}
+                  className="relative m-0 flex border-0 p-0"
+                  data-testid="daily-trend-chart-area"
+                  style={{ minWidth: `${trend.points.length * 2}rem` }}
                 >
-                  <div className="mb-2 font-mono text-sm">
-                    {activePoint.label}
+                  <div
+                    aria-hidden="true"
+                    className="pointer-events-none absolute inset-x-0 top-0 h-48"
+                  >
+                    {axis.ticks.map((tick) => (
+                      <div
+                        className={cn(
+                          "absolute inset-x-0 border-t",
+                          tick === 0
+                            ? "border-[var(--ledger-soft)]/50"
+                            : "border-dashed border-border",
+                        )}
+                        key={tick}
+                        style={{ bottom: `${percent(tick)}%` }}
+                      />
+                    ))}
                   </div>
-                  <div className="space-y-1 text-muted-foreground">
-                    <div className="text-[var(--ledger-income)]">
-                      売上 {yen(activePoint.revenue)}
-                    </div>
-                    <div className="text-[var(--ledger-expense)]">
-                      事業経費 {yen(activePoint.expense)}
-                    </div>
-                    <div className="text-foreground">
-                      利益 {yen(activePoint.profit)}
-                    </div>
+
+                  {trend.points.map((point) => {
+                    const selected = point.date === selectedPoint.date;
+                    const weekend =
+                      point.weekday === SATURDAY || point.weekday === SUNDAY;
+
+                    return (
+                      <button
+                        aria-label={`${point.label}(${point.weekdayLabel})の収支詳細`}
+                        aria-pressed={selected}
+                        className={cn(
+                          "relative min-w-8 flex-1 basis-0 cursor-pointer outline-none transition-colors focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring/40",
+                          weekend && "bg-foreground/[0.035]",
+                          selected && "bg-foreground/[0.09]",
+                          point.weekday === 1 &&
+                            point.day > 1 &&
+                            "border-l border-border",
+                        )}
+                        key={point.date}
+                        onClick={() => setSelectedDate(point.date)}
+                        type="button"
+                      >
+                        <span className="relative block h-48">
+                          <span
+                            className="absolute inset-x-0 flex items-end justify-center gap-px"
+                            style={{
+                              bottom: `${zeroPercent}%`,
+                              height: `${100 - zeroPercent}%`,
+                            }}
+                          >
+                            {point.revenue > 0 ? (
+                              <span
+                                className="min-h-0.5 w-2.5 rounded-t-sm bg-[var(--ledger-income)] opacity-85"
+                                style={{
+                                  height: `${(point.revenue / axis.max) * 100}%`,
+                                }}
+                              />
+                            ) : null}
+                            {point.expense > 0 ? (
+                              <span
+                                className="min-h-0.5 w-1.5 rounded-t-sm bg-[var(--ledger-expense)] opacity-80"
+                                style={{
+                                  height: `${(point.expense / axis.max) * 100}%`,
+                                }}
+                              />
+                            ) : null}
+                          </span>
+                        </span>
+                        <span className="flex h-12 flex-col items-center gap-1 pt-1.5">
+                          <span
+                            className={cn(
+                              "flex h-5 min-w-5 items-center justify-center rounded-full px-0.5 font-mono text-xs font-bold leading-none",
+                              selected
+                                ? "bg-foreground text-background"
+                                : isActiveDay(point)
+                                  ? "text-foreground"
+                                  : "text-muted-foreground",
+                            )}
+                          >
+                            {point.day}
+                          </span>
+                          <span
+                            className={cn(
+                              "text-[10px] font-bold leading-none",
+                              weekdayColor(point.weekday),
+                            )}
+                          >
+                            {point.weekdayLabel}
+                          </span>
+                        </span>
+                      </button>
+                    );
+                  })}
+
+                  <svg
+                    aria-hidden="true"
+                    className="pointer-events-none absolute inset-x-0 top-0 h-48 w-full"
+                    preserveAspectRatio="none"
+                    viewBox={`0 0 ${trend.points.length} 100`}
+                  >
+                    {segments.map((segment) => (
+                      <line
+                        key={segment.from}
+                        opacity={segment.bridgesRestDays ? 0.4 : 1}
+                        stroke="var(--ledger-ink)"
+                        strokeDasharray={
+                          segment.bridgesRestDays ? "2 4" : undefined
+                        }
+                        strokeLinecap="round"
+                        strokeWidth={segment.bridgesRestDays ? 1.5 : 2}
+                        vectorEffect="non-scaling-stroke"
+                        x1={segment.from + 0.5}
+                        x2={segment.to + 0.5}
+                        y1={100 - percent(trend.points[segment.from].profit)}
+                        y2={100 - percent(trend.points[segment.to].profit)}
+                      />
+                    ))}
+                  </svg>
+
+                  <div
+                    aria-hidden="true"
+                    className="pointer-events-none absolute inset-x-0 top-0 flex h-48"
+                  >
+                    {trend.points.map((point) => (
+                      <span
+                        className="relative min-w-8 flex-1 basis-0"
+                        key={point.date}
+                      >
+                        {isActiveDay(point) ? (
+                          <span
+                            className={cn(
+                              "absolute left-1/2 size-2.5 -translate-x-1/2 translate-y-1/2 rounded-full border-2 border-foreground",
+                              point.date === selectedPoint.date
+                                ? "bg-foreground"
+                                : "bg-[#fffdf7]",
+                            )}
+                            style={{ bottom: `${percent(point.profit)}%` }}
+                          />
+                        ) : null}
+                      </span>
+                    ))}
                   </div>
-                </div>
-              ) : null}
-            </fieldset>
-          </div>
+                </fieldset>
+              </div>
+            </div>
+
+            <DayDetail point={selectedPoint} />
+          </>
         ) : (
           <div className="p-10 text-center text-sm text-muted-foreground">
             この月のトレンドはまだありません
