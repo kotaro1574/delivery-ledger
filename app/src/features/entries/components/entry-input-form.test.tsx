@@ -120,7 +120,7 @@ describe("EntryInputForm", () => {
     expect(screen.getByText("分")).toHaveClass("whitespace-nowrap");
   });
 
-  it("収入保存後にトップへ遷移する", async () => {
+  it("収入保存後に稼いだ金額付きでトップへ遷移する", async () => {
     const fetchMock = vi.fn(
       async (_input: RequestInfo | URL, _init?: RequestInit) =>
         Response.json({ id: "entry-1" }),
@@ -134,7 +134,7 @@ describe("EntryInputForm", () => {
     });
     await userEvent.click(screen.getByRole("button", { name: "保存する" }));
 
-    await waitFor(() => expect(pushMock).toHaveBeenCalledWith("/"));
+    await waitFor(() => expect(pushMock).toHaveBeenCalledWith("/?gained=8200"));
   });
 
   it("経費保存後にトップへ遷移する", async () => {

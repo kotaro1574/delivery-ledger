@@ -4,6 +4,7 @@ import { SummaryService } from "@server/modules/summary/service";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { LedgerDashboard } from "@/features/ledger/components/ledger-dashboard";
+import { parseGained } from "@/features/motivation/utils/gained-param";
 
 export const dynamic = "force-dynamic";
 
@@ -19,7 +20,7 @@ function validMonth(month: string | undefined) {
 export default async function Page({
   searchParams,
 }: {
-  searchParams: Promise<{ month?: string }>;
+  searchParams: Promise<{ month?: string; gained?: string }>;
 }) {
   const auth = await getAuth();
   const session = await auth.api.getSession({
@@ -38,6 +39,11 @@ export default async function Page({
   ]);
 
   return (
-    <LedgerDashboard month={month} summary={summary} entries={entries.items} />
+    <LedgerDashboard
+      month={month}
+      summary={summary}
+      entries={entries.items}
+      gained={parseGained(params.gained, summary.lifetimeRevenue)}
+    />
   );
 }

@@ -29,6 +29,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { expenseCategories } from "@/features/entries/utils/journal-preview";
 import { DailyTrendCard } from "@/features/ledger/components/daily-trend-card";
+import { CelebrationBanner } from "@/features/motivation/components/celebration-banner";
 import { StatusPanel } from "@/features/motivation/components/status-panel";
 import { yen } from "@/features/motivation/utils/yen";
 import { formatDateLabel, formatDateString, parseDateString } from "@/lib/date";
@@ -116,10 +117,12 @@ export function LedgerDashboard({
   month,
   summary,
   entries,
+  gained,
 }: {
   month: string;
   summary: SummaryModel.Response;
   entries: EntriesModel.Item[];
+  gained?: number;
 }) {
   const router = useRouter();
   const [editing, setEditing] = useState<EntriesModel.Item | null>(null);
@@ -264,8 +267,19 @@ export function LedgerDashboard({
         </div>
       </div>
 
+      {gained !== undefined ? (
+        <CelebrationBanner
+          gained={gained}
+          lifetimeRevenue={summary.lifetimeRevenue}
+          month={month}
+        />
+      ) : null}
+
       <StatusPanel
         goal={summary.goal}
+        highlightFrom={
+          gained !== undefined ? summary.lifetimeRevenue - gained : undefined
+        }
         lifetimeRevenue={summary.lifetimeRevenue}
         month={month}
         revenue={summary.revenue}
