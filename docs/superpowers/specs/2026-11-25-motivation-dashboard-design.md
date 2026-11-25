@@ -39,6 +39,12 @@ Lv n → n+1 に必要な売上 = `30,000 + 5,000 × (n − 1)` 円。Lv1 スタ
 - 称号を 10 レベル刻みで付ける：ルーキー(1–9) → レギュラー(10–19) → エース(20–29) → ベテラン(30–39) → レジェンド(40+)
 - 純粋関数 `levelFromRevenue(total)` → `{ level, title, currentLevelStart, nextLevelAt, progress }` をユニットテスト付きで実装
 
+### 進化キャラクター（ユーザー追加要望、絵柄は Claude の判断）
+称号と連動して乗り物が進化する配達員キャラをステータス領域の左に表示する。
+- ルーキー: 徒歩＋配達バッグ / レギュラー: 自転車 / エース: 電動アシスト（スピード線） / ベテラン: 原付 / レジェンド: バイク＋金のオーラ
+- 外部画像は使わずインライン SVG の React コンポーネント（`stage` を受け取る）。紙・ベージュ基調に合う線画＋アクセント色
+- お祝い時はキャラが一度跳ねる（`prefers-reduced-motion` では無効）。称号が変わるレベルアップでは新しい姿を「進化！」と表示
+
 ### データ
 - 新テーブル `monthly_goals(user_id, month 'YYYY-MM', target_amount INTEGER > 0)`、`(user_id, month)` で unique。マイグレーション `0002_monthly_goals.sql` と drizzle schema に追加
 - 累計売上は既存の revenue 集計クエリから月条件を外したもの
