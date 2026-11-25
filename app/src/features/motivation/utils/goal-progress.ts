@@ -11,7 +11,7 @@ export type GoalProgress = {
   dailyPace: number | null;
 };
 
-function goalTiming(month: string, today: Date): GoalTiming {
+export function goalTiming(month: string, today: Date): GoalTiming {
   const current = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}`;
 
   if (month === current) {

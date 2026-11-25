@@ -29,6 +29,8 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { expenseCategories } from "@/features/entries/utils/journal-preview";
 import { DailyTrendCard } from "@/features/ledger/components/daily-trend-card";
+import { StatusPanel } from "@/features/motivation/components/status-panel";
+import { yen } from "@/features/motivation/utils/yen";
 import { formatDateLabel, formatDateString, parseDateString } from "@/lib/date";
 import { cn } from "@/lib/utils";
 
@@ -42,10 +44,6 @@ type EditForm = {
   categoryCode: string;
   receiptKey: string;
 };
-
-function yen(value: number) {
-  return `¥${Math.round(value).toLocaleString("ja-JP")}`;
-}
 
 function displayMonth(month: string) {
   const [year, rawMonth] = month.split("-");
@@ -265,6 +263,14 @@ export function LedgerDashboard({
           </Link>
         </div>
       </div>
+
+      <StatusPanel
+        goal={summary.goal}
+        lifetimeRevenue={summary.lifetimeRevenue}
+        month={month}
+        revenue={summary.revenue}
+        today={new Date()}
+      />
 
       <section className="grid overflow-hidden rounded-xl border border-border bg-border sm:grid-cols-3">
         <div className="bg-card p-5">
