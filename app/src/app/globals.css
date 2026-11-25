@@ -40,6 +40,9 @@
   --ledger-expense: #a8543a;
   --ledger-saturday: #3d6a8a;
   --ledger-sunday: #b5443b;
+  --ledger-gold: #c08a2e;
+  --ledger-gold-soft: #f6ead0;
+  --ledger-gold-ink: #8a5f17;
   --background: #f3efe6;
   --foreground: #22201a;
   --card: #fbf9f3;
@@ -82,5 +85,45 @@
 
   button:disabled {
     cursor: default;
+  }
+}
+
+@keyframes xp-fill {
+  from {
+    width: var(--xp-from);
+  }
+  to {
+    width: var(--xp-to);
+  }
+}
+
+@keyframes rider-bounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  35% {
+    transform: translateY(-14%);
+  }
+  60% {
+    transform: translateY(0);
+  }
+  78% {
+    transform: translateY(-5%);
+  }
+}
+
+@keyframes celebrate-pop {
+  0% {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.96);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(0) scale(1.02);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
   }
 }

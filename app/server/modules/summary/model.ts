@@ -26,6 +26,8 @@ export namespace SummaryModel {
     expense: z.number(),
     paidExpense: z.number(),
     profit: z.number(),
+    lifetimeRevenue: z.number(),
+    goal: z.number().nullable(),
     byCategory: z.array(Category),
     metrics: z.object({
       wagePerHour: z.number(),

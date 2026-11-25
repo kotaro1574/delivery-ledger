@@ -14,6 +14,8 @@ const summary = {
   expense: 0,
   paidExpense: 0,
   profit: 8200,
+  lifetimeRevenue: 0,
+  goal: null,
   byCategory: [],
   metrics: {
     wagePerHour: 1822,
@@ -37,6 +39,7 @@ describe("LedgerDashboard", () => {
 
     render(
       <LedgerDashboard
+        today="2026-06-15"
         month="2026-06"
         summary={summary}
         entries={[
@@ -95,6 +98,7 @@ describe("LedgerDashboard", () => {
 
     render(
       <LedgerDashboard
+        today="2026-06-15"
         month="2026-06"
         summary={summary}
         entries={[
@@ -133,6 +137,7 @@ describe("LedgerDashboard", () => {
   it("経費の事業分と私用分を区別して表示する", async () => {
     render(
       <LedgerDashboard
+        today="2026-06-15"
         month="2026-06"
         summary={{
           ...summary,
@@ -140,6 +145,8 @@ describe("LedgerDashboard", () => {
           expense: 564,
           paidExpense: 705,
           profit: 64995,
+          lifetimeRevenue: 0,
+          goal: null,
           byCategory: [{ code: "601", name: "車両費", amount: 564 }],
         }}
         entries={[
@@ -185,6 +192,7 @@ describe("LedgerDashboard", () => {
   it("日別収支トレンドを表示する", () => {
     render(
       <LedgerDashboard
+        today="2026-06-15"
         month="2026-06"
         summary={{
           ...summary,
@@ -192,6 +200,8 @@ describe("LedgerDashboard", () => {
           expense: 564,
           paidExpense: 705,
           profit: 9836,
+          lifetimeRevenue: 0,
+          goal: null,
         }}
         entries={[
           {
@@ -278,6 +288,7 @@ describe("LedgerDashboard", () => {
 
     render(
       <LedgerDashboard
+        today="2026-06-15"
         month="2026-06"
         summary={summary}
         entries={[
@@ -338,6 +349,7 @@ describe("LedgerDashboard", () => {
 
     render(
       <LedgerDashboard
+        today="2026-06-15"
         month="2026-06"
         summary={summary}
         entries={[
@@ -378,6 +390,7 @@ describe("LedgerDashboard", () => {
 
     render(
       <LedgerDashboard
+        today="2026-06-15"
         month="2026-06"
         summary={summary}
         entries={[
@@ -411,7 +424,14 @@ describe("LedgerDashboard", () => {
   });
 
   it("稼働日数と稼働時間を表示する", () => {
-    render(<LedgerDashboard entries={[]} month="2026-06" summary={summary} />);
+    render(
+      <LedgerDashboard
+        entries={[]}
+        month="2026-06"
+        summary={summary}
+        today="2026-06-15"
+      />,
+    );
 
     expect(screen.getByText("稼働日数")).toBeInTheDocument();
     expect(screen.getByText("12日")).toBeInTheDocument();

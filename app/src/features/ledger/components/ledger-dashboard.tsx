@@ -29,6 +29,9 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { expenseCategories } from "@/features/entries/utils/journal-preview";
 import { DailyTrendCard } from "@/features/ledger/components/daily-trend-card";
+import { CelebrationBanner } from "@/features/motivation/components/celebration-banner";
+import { StatusPanel } from "@/features/motivation/components/status-panel";
+import { yen } from "@/features/motivation/utils/yen";
 import { formatDateLabel, formatDateString, parseDateString } from "@/lib/date";
 import { cn } from "@/lib/utils";
 
@@ -42,10 +45,6 @@ type EditForm = {
   categoryCode: string;
   receiptKey: string;
 };
-
-function yen(value: number) {
-  return `¥${Math.round(value).toLocaleString("ja-JP")}`;
-}
 
 function displayMonth(month: string) {
   const [year, rawMonth] = month.split("-");
@@ -118,10 +117,14 @@ export function LedgerDashboard({
   month,
   summary,
   entries,
+  gained,
+  today,
 }: {
   month: string;
+  today: string;
   summary: SummaryModel.Response;
   entries: EntriesModel.Item[];
+  gained?: number;
 }) {
   const router = useRouter();
   const [editing, setEditing] = useState<EntriesModel.Item | null>(null);
@@ -265,6 +268,25 @@ export function LedgerDashboard({
           </Link>
         </div>
       </div>
+
+      {gained !== undefined ? (
+        <CelebrationBanner
+          gained={gained}
+          lifetimeRevenue={summary.lifetimeRevenue}
+          month={month}
+        />
+      ) : null}
+
+      <StatusPanel
+        goal={summary.goal}
+        highlightFrom={
+          gained !== undefined ? summary.lifetimeRevenue - gained : undefined
+        }
+        lifetimeRevenue={summary.lifetimeRevenue}
+        month={month}
+        revenue={summary.revenue}
+        today={parseDateString(today)}
+      />
 
       <section className="grid overflow-hidden rounded-xl border border-border bg-border sm:grid-cols-3">
         <div className="bg-card p-5">

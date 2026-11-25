@@ -180,3 +180,16 @@ export const dailyStats = sqliteTable(
     unique("daily_stats_user_date_uq").on(table.userId, table.statDate),
   ],
 );
+
+export const monthlyGoals = sqliteTable(
+  "monthly_goals",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    userId: text("user_id").notNull(),
+    month: text("month").notNull(),
+    targetAmount: integer("target_amount").notNull(),
+  },
+  (table) => [
+    unique("monthly_goals_user_month_uq").on(table.userId, table.month),
+  ],
+);

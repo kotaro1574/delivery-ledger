@@ -1,5 +1,6 @@
 import { AuthApp } from "@server/modules/auth";
 import { EntriesApp } from "@server/modules/entries";
+import { GoalsApp } from "@server/modules/goals";
 import { HealthCheckApp } from "@server/modules/health-check";
 import { ReceiptsApp } from "@server/modules/receipts";
 import { SummaryApp } from "@server/modules/summary";
@@ -11,6 +12,7 @@ const routes = app
   .route("/auth", AuthApp)
   .route("/health-check", HealthCheckApp)
   .route("/entries", EntriesApp)
+  .route("/goals", GoalsApp)
   .route("/receipts", ReceiptsApp)
   .route("/summary", SummaryApp);
 
