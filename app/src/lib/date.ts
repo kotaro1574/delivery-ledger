@@ -15,3 +15,14 @@ export function formatDateLabel(value: string) {
   const label = value.replaceAll("-", "/");
   return value === todayString() ? `${label}（今日）` : label;
 }
+
+const tokyoDateFormat = new Intl.DateTimeFormat("en-CA", {
+  timeZone: "Asia/Tokyo",
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+});
+
+export function tokyoDateString(now: Date) {
+  return tokyoDateFormat.format(now);
+}

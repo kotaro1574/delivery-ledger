@@ -118,8 +118,10 @@ export function LedgerDashboard({
   summary,
   entries,
   gained,
+  today,
 }: {
   month: string;
+  today: string;
   summary: SummaryModel.Response;
   entries: EntriesModel.Item[];
   gained?: number;
@@ -283,7 +285,7 @@ export function LedgerDashboard({
         lifetimeRevenue={summary.lifetimeRevenue}
         month={month}
         revenue={summary.revenue}
-        today={new Date()}
+        today={parseDateString(today)}
       />
 
       <section className="grid overflow-hidden rounded-xl border border-border bg-border sm:grid-cols-3">
