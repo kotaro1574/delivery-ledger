@@ -2,24 +2,34 @@
 
 import { Sparkles, X } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { levelFromRevenue } from "@/features/motivation/utils/level";
+import {
+  KING_LEVEL,
+  monthlyLevel,
+} from "@/features/motivation/utils/monthly-level";
 import { yen } from "@/features/motivation/utils/yen";
 import { cn } from "@/lib/utils";
 
 export function CelebrationBanner({
   gained,
-  lifetimeRevenue,
+  revenue,
+  goal,
   month,
 }: {
   gained: number;
-  lifetimeRevenue: number;
+  revenue: number;
+  goal: number | null;
   month: string;
 }) {
   const router = useRouter();
-  const before = levelFromRevenue(lifetimeRevenue - gained);
-  const after = levelFromRevenue(lifetimeRevenue);
-  const leveledUp = after.level > before.level;
-  const evolved = after.stage !== before.stage;
+  const before = monthlyLevel(revenue - gained, goal);
+  const after = monthlyLevel(revenue, goal);
+  const leveledUp = before && after ? after.level > before.level : false;
+  const becameKing =
+    before && after
+      ? before.level < KING_LEVEL && after.level >= KING_LEVEL
+      : false;
+  const evolved =
+    before && after ? !becameKing && after.tier !== before.tier : false;
 
   return (
     <section
@@ -44,7 +54,7 @@ export function CelebrationBanner({
           <div className="font-mono text-xl font-bold">
             +{yen(gained)} ゲット！
           </div>
-          {leveledUp ? (
+          {before && after && leveledUp ? (
             <div className="mt-1 flex flex-wrap items-baseline gap-x-3 gap-y-1">
               <span className="font-mono text-sm font-bold tracking-[0.2em] text-[var(--ledger-gold)]">
                 LEVEL UP!
@@ -52,17 +62,23 @@ export function CelebrationBanner({
               <span className="font-mono text-sm font-bold">
                 Lv.{before.level} → Lv.{after.level}
               </span>
+              {becameKing ? (
+                <span className="rounded-full bg-[var(--ledger-gold)] px-2 py-0.5 text-xs font-bold text-[var(--ledger-ink)]">
+                  目標達成！スライムキング誕生！
+                </span>
+              ) : null}
               {evolved ? (
                 <span className="rounded-full bg-[var(--ledger-gold)] px-2 py-0.5 text-xs font-bold text-[var(--ledger-ink)]">
                   {after.title}に進化！
                 </span>
               ) : null}
             </div>
-          ) : (
+          ) : null}
+          {after && !leveledUp ? (
             <div className="mt-0.5 text-xs font-bold opacity-80">
               次のLvまで あと {yen(after.remaining)}
             </div>
-          )}
+          ) : null}
         </div>
       </div>
       <button

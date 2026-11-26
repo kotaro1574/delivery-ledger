@@ -17,30 +17,78 @@ describe("StatusPanel", () => {
     refresh.mockReset();
   });
 
-  it("累計売上からレベルと称号とキャラを表示する", () => {
+  it("今月の達成率からレベルと称号とスライムを表示する", () => {
+    render(
+      <StatusPanel
+        goal={300000}
+        kingMonths={0}
+        month="2026-11"
+        revenue={186000}
+        today={today}
+      />,
+    );
+
+    expect(screen.getByText("Lv.25")).toBeInTheDocument();
+    expect(screen.getByText("エース")).toBeInTheDocument();
+    expect(screen.getByText("次のLvまで ¥1,500")).toBeInTheDocument();
+    expect(
+      screen.getByRole("img", { name: "Lv.25 エースの配達スライム" }),
+    ).toBeInTheDocument();
+  });
+
+  it("目標がない月はたまごを表示する", () => {
     render(
       <StatusPanel
         goal={null}
-        lifetimeRevenue={612400}
+        kingMonths={0}
         month="2026-11"
         revenue={0}
         today={today}
       />,
     );
 
-    expect(screen.getByText("Lv.12")).toBeInTheDocument();
-    expect(screen.getByText("レギュラー")).toBeInTheDocument();
-    expect(screen.getByText("次のLvまで ¥77,600")).toBeInTheDocument();
     expect(
-      screen.getByRole("img", { name: "自転車で配達するレギュラー" }),
+      screen.getByRole("img", { name: "スライムのたまご" }),
     ).toBeInTheDocument();
+    expect(
+      screen.getByText("目標を決めるとスライムが生まれる"),
+    ).toBeInTheDocument();
+  });
+
+  it("キングになった回数を表示する", () => {
+    render(
+      <StatusPanel
+        goal={300000}
+        kingMonths={3}
+        month="2026-11"
+        revenue={0}
+        today={today}
+      />,
+    );
+
+    expect(screen.getByText("キング達成 3回")).toBeInTheDocument();
+  });
+
+  it("目標を達成した月はキングになる", () => {
+    render(
+      <StatusPanel
+        goal={300000}
+        kingMonths={1}
+        month="2026-11"
+        revenue={300000}
+        today={today}
+      />,
+    );
+
+    expect(screen.getByText("キング")).toBeInTheDocument();
+    expect(screen.getByText("目標達成！")).toBeInTheDocument();
   });
 
   it("目標がない月は目標設定ボタンを出す", () => {
     render(
       <StatusPanel
         goal={null}
-        lifetimeRevenue={0}
+        kingMonths={0}
         month="2026-11"
         revenue={0}
         today={today}
@@ -56,7 +104,7 @@ describe("StatusPanel", () => {
     render(
       <StatusPanel
         goal={300000}
-        lifetimeRevenue={612400}
+        kingMonths={0}
         month="2026-11"
         revenue={186000}
         today={today}
@@ -64,6 +112,7 @@ describe("StatusPanel", () => {
     );
 
     expect(screen.getByText("62%")).toBeInTheDocument();
+    expect(screen.getByText("¥186,000 稼いだ")).toBeInTheDocument();
     expect(screen.getByText("あと ¥114,000")).toBeInTheDocument();
     expect(screen.getByText("1日 ¥19,000 ペース")).toBeInTheDocument();
   });
@@ -72,7 +121,7 @@ describe("StatusPanel", () => {
     render(
       <StatusPanel
         goal={300000}
-        lifetimeRevenue={612400}
+        kingMonths={0}
         month="2026-10"
         revenue={320000}
         today={today}
@@ -88,7 +137,7 @@ describe("StatusPanel", () => {
     render(
       <StatusPanel
         goal={300000}
-        lifetimeRevenue={612400}
+        kingMonths={0}
         month="2026-10"
         revenue={100000}
         today={today}
@@ -107,7 +156,7 @@ describe("StatusPanel", () => {
     render(
       <StatusPanel
         goal={null}
-        lifetimeRevenue={0}
+        kingMonths={0}
         month="2026-11"
         revenue={0}
         today={today}
@@ -137,7 +186,7 @@ describe("StatusPanel", () => {
     render(
       <StatusPanel
         goal={300000}
-        lifetimeRevenue={0}
+        kingMonths={0}
         month="2026-11"
         revenue={0}
         today={today}

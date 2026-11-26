@@ -3,17 +3,15 @@ import { monthlyGoals } from "@server/db/schema";
 import { and, eq } from "drizzle-orm";
 
 export const GoalsService = {
-  async find(userId: string, month: string): Promise<number | null> {
+  async listAll(userId: string) {
     const db = await getDB();
-    const rows = await db
-      .select({ targetAmount: monthlyGoals.targetAmount })
+    return db
+      .select({
+        month: monthlyGoals.month,
+        targetAmount: monthlyGoals.targetAmount,
+      })
       .from(monthlyGoals)
-      .where(
-        and(eq(monthlyGoals.userId, userId), eq(monthlyGoals.month, month)),
-      )
-      .limit(1);
-
-    return rows[0]?.targetAmount ?? null;
+      .where(eq(monthlyGoals.userId, userId));
   },
 
   async upsert(userId: string, month: string, targetAmount: number) {

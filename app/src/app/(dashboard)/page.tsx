@@ -41,7 +41,7 @@ export default async function Page({
       today={today}
       summary={summary}
       entries={entries.items}
-      gained={parseGained(params.gained, summary.lifetimeRevenue)}
+      gained={parseGained(params.gained, summary.revenue)}
     />
   );
 }

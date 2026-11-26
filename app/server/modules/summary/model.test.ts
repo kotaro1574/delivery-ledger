@@ -9,8 +9,8 @@ describe("SummaryModel", () => {
         expense: 564,
         paidExpense: 705,
         profit: 64995,
-        lifetimeRevenue: 612400,
         goal: 300000,
+        kingMonths: 2,
         byCategory: [{ code: "601", name: "車両費", amount: 564 }],
         metrics: {
           wagePerHour: 0,
@@ -25,8 +25,8 @@ describe("SummaryModel", () => {
       expense: 564,
       paidExpense: 705,
       profit: 64995,
-      lifetimeRevenue: 612400,
       goal: 300000,
+      kingMonths: 2,
       byCategory: [{ code: "601", name: "車両費", amount: 564 }],
       metrics: {
         wagePerHour: 0,
