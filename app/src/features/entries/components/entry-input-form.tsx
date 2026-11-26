@@ -294,7 +294,11 @@ export function EntryInputForm() {
       ]);
       resetForm();
       toast.success("保存した");
-      router.push(mode === "income" ? `/?gained=${amountNumber}` : "/");
+      router.push(
+        mode === "income"
+          ? `/?month=${entryDate.slice(0, 7)}&gained=${amountNumber}`
+          : "/",
+      );
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "保存に失敗した");
     } finally {

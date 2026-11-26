@@ -134,7 +134,11 @@ describe("EntryInputForm", () => {
     });
     await userEvent.click(screen.getByRole("button", { name: "保存する" }));
 
-    await waitFor(() => expect(pushMock).toHaveBeenCalledWith("/?gained=8200"));
+    await waitFor(() =>
+      expect(pushMock).toHaveBeenCalledWith(
+        expect.stringMatching(/^\/\?month=\d{4}-\d{2}&gained=8200$/),
+      ),
+    );
   });
 
   it("経費保存後にトップへ遷移する", async () => {

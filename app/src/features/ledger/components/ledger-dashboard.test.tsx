@@ -14,7 +14,7 @@ const summary = {
   expense: 0,
   paidExpense: 0,
   profit: 8200,
-  lifetimeRevenue: 0,
+  kingMonths: 0,
   goal: null,
   byCategory: [],
   metrics: {
@@ -145,7 +145,7 @@ describe("LedgerDashboard", () => {
           expense: 564,
           paidExpense: 705,
           profit: 64995,
-          lifetimeRevenue: 0,
+          kingMonths: 0,
           goal: null,
           byCategory: [{ code: "601", name: "車両費", amount: 564 }],
         }}
@@ -200,7 +200,7 @@ describe("LedgerDashboard", () => {
           expense: 564,
           paidExpense: 705,
           profit: 9836,
-          lifetimeRevenue: 0,
+          kingMonths: 0,
           goal: null,
         }}
         entries={[

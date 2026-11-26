@@ -272,17 +272,18 @@ export function LedgerDashboard({
       {gained !== undefined ? (
         <CelebrationBanner
           gained={gained}
-          lifetimeRevenue={summary.lifetimeRevenue}
+          goal={summary.goal}
           month={month}
+          revenue={summary.revenue}
         />
       ) : null}
 
       <StatusPanel
         goal={summary.goal}
         highlightFrom={
-          gained !== undefined ? summary.lifetimeRevenue - gained : undefined
+          gained !== undefined ? summary.revenue - gained : undefined
         }
-        lifetimeRevenue={summary.lifetimeRevenue}
+        kingMonths={summary.kingMonths}
         month={month}
         revenue={summary.revenue}
         today={parseDateString(today)}
