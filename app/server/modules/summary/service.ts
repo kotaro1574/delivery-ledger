@@ -8,6 +8,7 @@ import {
 } from "@server/db/schema";
 import { and, eq, like, sql } from "drizzle-orm";
 import { GoalsService } from "../goals/service";
+import { countKingMonths } from "./king-months";
 import { calculateMetrics } from "./metrics";
 import type { SummaryModel } from "./model";
 import { countWorkDays } from "./work-days";
@@ -25,8 +26,8 @@ export const SummaryService = {
       byCategory,
       detailStatsRows,
       legacyStatsRows,
-      lifetimeRevenueResult,
-      goal,
+      monthlyRevenues,
+      goals,
     ] = await Promise.all([
       db
         .select({
@@ -119,6 +120,7 @@ export const SummaryService = {
         ),
       db
         .select({
+          month: sql<string>`substr(${journalEntries.entryDate}, 1, 7)`,
           total: sql<number>`coalesce(sum(${journalLines.amount}), 0)`,
         })
         .from(journalEntries)
@@ -130,8 +132,9 @@ export const SummaryService = {
             eq(accounts.category, "revenue"),
             eq(journalLines.side, "credit"),
           ),
-        ),
-      GoalsService.find(userId, month),
+        )
+        .groupBy(sql`substr(${journalEntries.entryDate}, 1, 7)`),
+      GoalsService.listAll(userId),
     ]);
 
     const revenue = revenueResult[0]?.total ?? 0;
@@ -175,8 +178,8 @@ export const SummaryService = {
       expense,
       paidExpense,
       profit: revenue - expense,
-      lifetimeRevenue: lifetimeRevenueResult[0]?.total ?? 0,
-      goal,
+      goal: goals.find((item) => item.month === month)?.targetAmount ?? null,
+      kingMonths: countKingMonths(goals, monthlyRevenues),
       byCategory,
       metrics: calculateMetrics({
         revenue,
