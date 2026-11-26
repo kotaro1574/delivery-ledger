@@ -112,7 +112,7 @@ describe("StatusPanel", () => {
     );
 
     expect(screen.getByText("62%")).toBeInTheDocument();
-    expect(screen.getByText("¥186,000 / ¥300,000")).toBeInTheDocument();
+    expect(screen.getByText("¥186,000 稼いだ")).toBeInTheDocument();
     expect(screen.getByText("あと ¥114,000")).toBeInTheDocument();
     expect(screen.getByText("1日 ¥19,000 ペース")).toBeInTheDocument();
   });

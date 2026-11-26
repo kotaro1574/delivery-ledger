@@ -74,9 +74,9 @@ export function StatusPanel({
                 }
                 progress={progress}
               />
-              <div className="mt-1.5 flex items-center justify-between gap-2 font-mono text-xs font-bold">
-                <span className="text-muted-foreground">
-                  {yen(revenue)} / {yen(progress.goal)}
+              <div className="mt-1.5 flex flex-wrap items-center justify-between gap-x-2 whitespace-nowrap font-mono text-xs font-bold">
+                <span className="text-[var(--ledger-income)]">
+                  {yen(revenue)} 稼いだ
                 </span>
                 <span className="text-[var(--ledger-gold-ink)]">
                   次のLvまで {yen(level.remaining)}
