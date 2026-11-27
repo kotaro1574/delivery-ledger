@@ -62,9 +62,9 @@ describe("LedgerDashboard", () => {
     );
 
     await userEvent.click(
-      screen.getByRole("button", { name: "編集 夜ピーク" }),
+      screen.getByRole("button", { name: "なおす 夜ピーク" }),
     );
-    fireEvent.change(screen.getByLabelText("売上"), {
+    fireEvent.change(screen.getByLabelText("うりあげ"), {
       target: { value: "9400" },
     });
     fireEvent.change(screen.getByLabelText("時間"), {
@@ -73,7 +73,7 @@ describe("LedgerDashboard", () => {
     fireEvent.change(screen.getByLabelText("分"), {
       target: { value: "15" },
     });
-    await userEvent.click(screen.getByRole("button", { name: "更新する" }));
+    await userEvent.click(screen.getByRole("button", { name: "かきかえる" }));
 
     await waitFor(() => expect(fetchMock).toHaveBeenCalled());
     expect(fetchMock).toHaveBeenCalledWith(
@@ -123,9 +123,9 @@ describe("LedgerDashboard", () => {
     expect(screen.getByText("6/10(水)")).toBeInTheDocument();
 
     await userEvent.click(
-      screen.getByRole("button", { name: "削除 夜ピーク" }),
+      screen.getByRole("button", { name: "けす 夜ピーク" }),
     );
-    await userEvent.click(screen.getByRole("button", { name: "削除する" }));
+    await userEvent.click(screen.getByRole("button", { name: "けす" }));
 
     await waitFor(() => expect(fetchMock).toHaveBeenCalled());
     expect(fetchMock).toHaveBeenCalledWith(
@@ -175,7 +175,7 @@ describe("LedgerDashboard", () => {
     expect(screen.getByText("経費内訳（事業分）")).toBeInTheDocument();
 
     await userEvent.click(
-      screen.getByRole("button", { name: "編集 SOLATOガソリン" }),
+      screen.getByRole("button", { name: "なおす SOLATOガソリン" }),
     );
 
     const receiptImage = screen.getByRole("img", {
@@ -264,8 +264,7 @@ describe("LedgerDashboard", () => {
       />,
     );
 
-    expect(screen.getByText("DAILY TREND")).toBeInTheDocument();
-    expect(screen.getByText("日別収支トレンド")).toBeInTheDocument();
+    expect(screen.getByText("ひごとの しゅうし")).toBeInTheDocument();
     expect(screen.getByText("最高利益日")).toBeInTheDocument();
     expect(screen.getByText("6/9")).toBeInTheDocument();
     expect(
@@ -276,7 +275,7 @@ describe("LedgerDashboard", () => {
     expect(screen.getByText("経費率")).toBeInTheDocument();
     expect(screen.getByText("5%")).toBeInTheDocument();
     expect(
-      screen.getByLabelText("2026年6月の日別収支トレンド"),
+      screen.getByLabelText("2026年6月の ひごとの しゅうし"),
     ).toBeInTheDocument();
   });
 
@@ -311,9 +310,9 @@ describe("LedgerDashboard", () => {
     );
 
     await userEvent.click(
-      screen.getByRole("button", { name: "編集 夜ピーク" }),
+      screen.getByRole("button", { name: "なおす 夜ピーク" }),
     );
-    await userEvent.click(screen.getByLabelText("稼働日"));
+    await userEvent.click(screen.getByLabelText("はたらいた ひ"));
     const dayButton = screen
       .getAllByRole("button")
       .filter(
@@ -323,8 +322,10 @@ describe("LedgerDashboard", () => {
       .find((button) => button.textContent === "4" && !button.disabled);
     expect(dayButton).toBeDefined();
     await userEvent.click(dayButton as HTMLButtonElement);
-    expect(screen.getByLabelText("稼働日")).toHaveTextContent("2026/06/04");
-    await userEvent.click(screen.getByRole("button", { name: "更新する" }));
+    expect(screen.getByLabelText("はたらいた ひ")).toHaveTextContent(
+      "2026/06/04",
+    );
+    await userEvent.click(screen.getByRole("button", { name: "かきかえる" }));
 
     await waitFor(() => expect(fetchMock).toHaveBeenCalled());
     expect(fetchMock).toHaveBeenCalledWith(
@@ -372,16 +373,16 @@ describe("LedgerDashboard", () => {
     );
 
     await userEvent.click(
-      screen.getByRole("button", { name: "編集 夜ピーク" }),
+      screen.getByRole("button", { name: "なおす 夜ピーク" }),
     );
 
-    expect(screen.getByLabelText("売上")).toHaveValue("8,200");
+    expect(screen.getByLabelText("うりあげ")).toHaveValue("8,200");
 
-    fireEvent.change(screen.getByLabelText("売上"), {
+    fireEvent.change(screen.getByLabelText("うりあげ"), {
       target: { value: "9400" },
     });
 
-    expect(screen.getByLabelText("売上")).toHaveValue("9,400");
+    expect(screen.getByLabelText("うりあげ")).toHaveValue("9,400");
   });
 
   it("編集ダイアログの件数とオンライン時間の入力枠を同じ高さで表示する", async () => {
@@ -413,10 +414,10 @@ describe("LedgerDashboard", () => {
     );
 
     await userEvent.click(
-      screen.getByRole("button", { name: "編集 夜ピーク" }),
+      screen.getByRole("button", { name: "なおす 夜ピーク" }),
     );
 
-    expect(screen.getByLabelText("件数").parentElement).toHaveClass("h-12");
+    expect(screen.getByLabelText("けんすう").parentElement).toHaveClass("h-12");
     expect(screen.getByLabelText("時間").parentElement).toHaveClass("h-12");
     expect(screen.getByLabelText("分").parentElement).toHaveClass("h-12");
     expect(screen.getByText("時間")).toHaveClass("whitespace-nowrap");
@@ -433,9 +434,9 @@ describe("LedgerDashboard", () => {
       />,
     );
 
-    expect(screen.getByText("稼働日数")).toBeInTheDocument();
+    expect(screen.getByText("はたらいた ひかず")).toBeInTheDocument();
     expect(screen.getByText("12日")).toBeInTheDocument();
-    expect(screen.getByText("稼働時間")).toBeInTheDocument();
+    expect(screen.getByText("はたらいた じかん")).toBeInTheDocument();
     expect(screen.getByText("4.5時間")).toBeInTheDocument();
     expect(screen.queryByText("オンライン 4.5時間")).not.toBeInTheDocument();
   });

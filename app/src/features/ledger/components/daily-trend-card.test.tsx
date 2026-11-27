@@ -85,7 +85,7 @@ describe("DailyTrendCard", () => {
 
     expect(
       within(screen.getByTestId("daily-trend-detail")).getByText(
-        "この日の記録はありません",
+        "この ひの きろくは ない",
       ),
     ).toBeInTheDocument();
   });
@@ -117,7 +117,7 @@ describe("DailyTrendCard", () => {
     render(<DailyTrendCard entries={[]} month="2026-06" />);
 
     expect(
-      screen.getByText("この月のトレンドはまだありません"),
+      screen.getByText("この つきの きろくは まだ ない"),
     ).toBeInTheDocument();
   });
 });
