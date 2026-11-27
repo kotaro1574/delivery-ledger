@@ -1,16 +1,14 @@
 "use client";
 
-import { BarChart3, BookOpen, LogOut, PenLine } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Button } from "@/components/ui/button";
+import { CommandMenu } from "@/components/game/command-menu";
 import { signOut } from "@/lib/auth/client";
-import { cn } from "@/lib/utils";
 
 const navItems = [
-  { href: "/", label: "台帳", icon: BookOpen },
-  { href: "/year", label: "年次", icon: BarChart3 },
-  { href: "/input", label: "入力", icon: PenLine },
+  { href: "/", label: "だいちょう" },
+  { href: "/year", label: "ねんかん" },
+  { href: "/input", label: "きろくする" },
 ];
 
 export function AppShell({
@@ -28,53 +26,34 @@ export function AppShell({
   };
 
   return (
-    <div className="min-h-screen px-4 py-7 sm:px-6 sm:py-10">
+    <div className="min-h-screen px-4 py-6 sm:px-6 sm:py-10">
       <div className="mx-auto w-full max-w-3xl">
-        <header className="mb-7 flex flex-wrap items-end justify-between gap-4">
+        <header className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <Link
-              href="/"
-              className="font-serif text-2xl font-bold tracking-wide"
-            >
-              配達収支台帳
+            <Link className="text-xl tracking-wider sm:text-2xl" href="/">
+              はいたつ しゅうし だいちょう
             </Link>
-            <div className="mt-1 text-xs tracking-[0.18em] text-muted-foreground">
+            <div className="mt-1 text-xs tracking-[0.18em] text-[var(--game-sub)]">
               UBER DELIVERY · 青色申告対応
+              <span className="ml-2 hidden sm:inline">{userName}</span>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="hidden text-right text-xs text-muted-foreground sm:block">
-              {userName}
-            </div>
-            <nav className="flex rounded-xl border border-border bg-card p-1">
-              {navItems.map((item) => {
-                const Icon = item.icon;
-                const active = pathname === item.href;
-
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className={cn(
-                      "inline-flex h-9 items-center gap-1.5 rounded-lg px-3 text-sm font-bold text-muted-foreground transition",
-                      active && "bg-background text-foreground shadow-sm",
-                    )}
-                  >
-                    <Icon className="size-4" />
-                    {item.label}
-                  </Link>
-                );
-              })}
-            </nav>
-            <Button
+          <CommandMenu activeHref={pathname} items={navItems}>
+            <button
               aria-label="ログアウト"
-              variant="outline"
-              size="icon"
+              className="group inline-flex h-9 items-center gap-1 rounded-[2px] px-2 text-sm text-[var(--game-sub)] outline-none hover:text-[var(--game-gold)] focus-visible:ring-2 focus-visible:ring-[var(--game-gold)]"
               onClick={handleSignOut}
+              type="button"
             >
-              <LogOut className="size-4" />
-            </Button>
-          </div>
+              <span
+                aria-hidden="true"
+                className="invisible w-3 text-xs group-hover:visible group-focus-visible:visible"
+              >
+                ▶
+              </span>
+              ログアウト
+            </button>
+          </CommandMenu>
         </header>
         {children}
       </div>

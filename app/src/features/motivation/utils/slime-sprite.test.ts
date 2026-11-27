@@ -88,3 +88,15 @@ describe("toRuns", () => {
     ]);
   });
 });
+
+describe("紺の背景での見え方", () => {
+  it("乗り物と輪郭に暗いインク色を使わない", () => {
+    for (const tier of [0, 1, 2, 3, 4] as const) {
+      const colors = new Set(
+        composeSlime({ tier, step: 9, gems: 3 }).grid.flat(),
+      );
+      expect(colors.has("#22201a")).toBe(false);
+      expect(colors.has("rgba(34, 32, 26, 0.12)")).toBe(false);
+    }
+  });
+});

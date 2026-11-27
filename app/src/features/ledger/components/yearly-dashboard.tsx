@@ -4,7 +4,7 @@ import type { SummaryModel } from "@server/modules/summary/model";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { type FocusEvent, type PointerEvent, useState } from "react";
-import { Card } from "@/components/ui/card";
+import { GameWindow } from "@/components/game/game-window";
 
 function yen(value: number) {
   return `¥${Math.round(value).toLocaleString("ja-JP")}`;
@@ -149,25 +149,25 @@ export function YearlyDashboard({
   };
 
   return (
-    <div className="space-y-7">
+    <div className="space-y-6">
       <div className="flex items-center justify-between gap-4">
-        <div className="text-sm font-bold tracking-[0.2em] text-muted-foreground">
-          YEARLY LEDGER
+        <div className="text-sm tracking-[0.2em] text-[var(--game-sub)]">
+          としの きろく
         </div>
         <div className="flex items-center gap-3">
           <Link
-            aria-label="前の年"
-            className="grid size-9 place-items-center rounded-lg border border-border bg-card transition hover:bg-accent"
+            aria-label="まえの とし"
+            className="grid size-9 place-items-center rounded-[4px] border-2 border-[var(--game-line)] transition hover:text-[var(--game-gold)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--game-gold)]"
             href={`/year?year=${moveYear(year, -1)}`}
           >
             <ChevronLeft className="size-4" />
           </Link>
-          <div className="min-w-24 text-center font-mono text-base font-bold">
+          <div className="min-w-24 text-center font-mono text-base font-bold text-[var(--game-gold)]">
             {displayYear(year)}
           </div>
           <Link
-            aria-label="次の年"
-            className="grid size-9 place-items-center rounded-lg border border-border bg-card transition hover:bg-accent"
+            aria-label="つぎの とし"
+            className="grid size-9 place-items-center rounded-[4px] border-2 border-[var(--game-line)] transition hover:text-[var(--game-gold)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--game-gold)]"
             href={`/year?year=${moveYear(year, 1)}`}
           >
             <ChevronRight className="size-4" />
@@ -175,77 +175,70 @@ export function YearlyDashboard({
         </div>
       </div>
 
-      <section className="grid overflow-hidden rounded-xl border border-border bg-border sm:grid-cols-4">
-        <div className="bg-card p-5">
-          <div className="mb-2 text-xs tracking-widest text-muted-foreground">
-            年間売上
+      <GameWindow
+        className="grid grid-cols-2 gap-4 sm:grid-cols-4"
+        title="ねんかんの しゅうし"
+      >
+        <div>
+          <div className="mb-1 text-xs tracking-widest text-[var(--game-sub)]">
+            ねんかん うりあげ
           </div>
-          <div className="font-mono text-2xl font-bold text-[var(--ledger-income)]">
+          <div className="font-mono text-2xl font-bold text-[var(--game-income)]">
             {yen(summary.revenue)}
           </div>
         </div>
-        <div className="bg-card p-5">
-          <div className="mb-2 text-xs tracking-widest text-muted-foreground">
+        <div>
+          <div className="mb-1 text-xs tracking-widest text-[var(--game-sub)]">
             経費（事業分）
           </div>
-          <div className="font-mono text-2xl font-bold text-[var(--ledger-expense)]">
+          <div className="font-mono text-2xl font-bold text-[var(--game-expense)]">
             {yen(summary.expense)}
           </div>
           {showExpenseBreakdown ? (
-            <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs font-bold text-muted-foreground">
+            <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 font-mono text-xs text-[var(--game-sub)]">
               <span>支払総額 {yen(summary.paidExpense)}</span>
               <span>私用分 {yen(privateExpense)}</span>
             </div>
           ) : null}
         </div>
-        <div className="bg-[#fffdf7] p-5">
-          <div className="mb-2 text-xs tracking-widest text-muted-foreground">
+        <div>
+          <div className="mb-1 text-xs tracking-widest text-[var(--game-sub)]">
             差引利益
           </div>
-          <div className="font-mono text-2xl font-bold">
+          <div className="font-mono text-2xl font-bold text-[var(--game-gold)]">
             {yen(summary.profit)}
           </div>
         </div>
-        <div className="bg-[#fffdf7] p-5">
-          <div className="mb-2 text-xs tracking-widest text-muted-foreground">
+        <div>
+          <div className="mb-1 text-xs tracking-widest text-[var(--game-sub)]">
             利益率
           </div>
           <div className="font-mono text-2xl font-bold">
             {summary.profitRate}%
           </div>
-          <div className="mt-1 text-xs font-bold text-muted-foreground">
+          <div className="mt-1 text-xs text-[var(--game-sub)]">
             差引利益 ÷ 売上
           </div>
         </div>
-      </section>
+      </GameWindow>
 
-      <section>
-        <div className="mb-3 flex flex-wrap items-end justify-between gap-3">
-          <div>
-            <div className="text-sm font-bold tracking-[0.2em] text-muted-foreground">
-              ANNUAL TREND
-            </div>
-            <div className="mt-1 font-serif text-xl font-bold">
-              月別収支トレンド
-            </div>
-          </div>
-          <div className="flex flex-wrap gap-2 text-xs font-bold text-muted-foreground">
-            <span className="inline-flex items-center gap-1">
-              <span className="size-2 rounded-sm bg-[var(--ledger-income)]" />
-              売上
-            </span>
-            <span className="inline-flex items-center gap-1">
-              <span className="size-2 rounded-sm bg-[var(--ledger-expense)]" />
-              事業経費
-            </span>
-            <span className="inline-flex items-center gap-1">
-              <span className="h-0.5 w-4 rounded-full bg-foreground" />
-              利益
-            </span>
-          </div>
+      <GameWindow className="px-0 pb-0" title="つきごとの しゅうし">
+        <div className="flex flex-wrap justify-end gap-3 px-4 text-xs text-[var(--game-sub)]">
+          <span className="inline-flex items-center gap-1">
+            <span className="size-2 bg-[var(--game-income)]" />
+            うりあげ
+          </span>
+          <span className="inline-flex items-center gap-1">
+            <span className="size-2 bg-[var(--game-expense)]" />
+            事業経費
+          </span>
+          <span className="inline-flex items-center gap-1">
+            <span className="h-0.5 w-4 bg-[var(--game-gold)]" />
+            利益
+          </span>
         </div>
 
-        <Card className="overflow-hidden border-border bg-card p-0">
+        <div>
           {hasData ? (
             <div
               className="overflow-x-auto px-4 py-5 sm:p-5"
@@ -258,9 +251,9 @@ export function YearlyDashboard({
                 onBlur={handleBlur}
                 onPointerLeave={() => setActiveMonth(null)}
               >
-                <legend className="sr-only">月別年次収支詳細</legend>
+                <legend className="sr-only">つきごとの しゅうし</legend>
                 <svg
-                  aria-label={`${displayYear(year)}の月別収支トレンド`}
+                  aria-label={`${displayYear(year)}の つきごとの しゅうし`}
                   className="h-72 w-full overflow-visible"
                   role="img"
                   viewBox={`0 0 ${chart.width} ${chart.height}`}
@@ -271,7 +264,7 @@ export function YearlyDashboard({
                     return (
                       <g key={value}>
                         <line
-                          stroke="rgb(222 216 201)"
+                          stroke="rgb(255 255 255 / 25%)"
                           strokeDasharray={value === 0 ? "0" : "4 6"}
                           x1={chart.left}
                           x2={chart.width - chart.right}
@@ -279,9 +272,9 @@ export function YearlyDashboard({
                           y2={y}
                         />
                         <text
-                          fill="rgb(122 116 101)"
+                          fill="var(--game-sub)"
                           fontSize="11"
-                          fontWeight="700"
+                          fontFamily="var(--font-mono)"
                           textAnchor="end"
                           x={chart.left - 8}
                           y={y + 4}
@@ -300,27 +293,27 @@ export function YearlyDashboard({
                     return (
                       <g key={month.month}>
                         <rect
-                          fill="var(--ledger-income)"
+                          fill="var(--game-income)"
                           height={Math.abs(zeroY - revenueY)}
-                          opacity={month.revenue > 0 ? 0.82 : 0}
+                          opacity={month.revenue > 0 ? 1 : 0}
                           rx="2"
                           width={barWidth}
                           x={x - barWidth - 2}
                           y={Math.min(zeroY, revenueY)}
                         />
                         <rect
-                          fill="var(--ledger-expense)"
+                          fill="var(--game-expense)"
                           height={Math.abs(zeroY - expenseY)}
-                          opacity={month.expense > 0 ? 0.7 : 0}
+                          opacity={month.expense > 0 ? 1 : 0}
                           rx="2"
                           width={barWidth}
                           x={x + 2}
                           y={Math.min(zeroY, expenseY)}
                         />
                         <text
-                          fill="rgb(122 116 101)"
+                          fill="var(--game-sub)"
                           fontSize="11"
-                          fontWeight="700"
+                          fontFamily="var(--font-mono)"
                           textAnchor="middle"
                           x={x}
                           y={chart.height - 14}
@@ -334,9 +327,9 @@ export function YearlyDashboard({
                   <polyline
                     fill="none"
                     points={profitLine}
-                    stroke="rgb(35 32 27)"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
+                    stroke="var(--game-gold)"
+                    strokeLinecap="square"
+                    strokeLinejoin="miter"
                     strokeWidth="3"
                   />
                   {summary.monthly.map((month, index) =>
@@ -344,10 +337,10 @@ export function YearlyDashboard({
                       <circle
                         cx={scaleX(index)}
                         cy={scaleY(month.profit)}
-                        fill="#fffdf7"
+                        fill="var(--game-bg)"
                         key={month.month}
                         r="4"
-                        stroke="rgb(35 32 27)"
+                        stroke="var(--game-gold)"
                         strokeWidth="2"
                       />
                     ) : null,
@@ -359,7 +352,7 @@ export function YearlyDashboard({
                     activePoint ? "yearly-trend-popover" : undefined
                   }
                   aria-label={`${displayYear(year)}の月別収支詳細を表示`}
-                  className="absolute inset-0 z-10 cursor-crosshair rounded-lg bg-transparent outline-none focus-visible:ring-2 focus-visible:ring-ring/35"
+                  className="absolute inset-0 z-10 cursor-crosshair rounded-lg bg-transparent outline-none focus-visible:ring-2 focus-visible:ring-[var(--game-gold)]"
                   onClick={handlePointerSelect}
                   onFocus={() =>
                     setActiveMonth(interactiveMonths[0]?.month ?? null)
@@ -387,7 +380,7 @@ export function YearlyDashboard({
 
                 {activePoint ? (
                   <div
-                    className="pointer-events-none absolute z-20 min-w-44 rounded-lg border border-border bg-[#fffdf7] p-3 text-xs font-bold shadow-lg"
+                    className="pointer-events-none absolute z-20 min-w-44 rounded-[4px] border-[3px] border-[var(--game-line)] bg-[var(--game-bg)] p-3 font-mono text-xs shadow-[0_0_0_3px_var(--game-bg)]"
                     id="yearly-trend-popover"
                     role="tooltip"
                     style={{
@@ -401,14 +394,14 @@ export function YearlyDashboard({
                     <div className="mb-2 font-mono text-sm">
                       {displayMonth(activePoint.month)}
                     </div>
-                    <div className="space-y-1 text-muted-foreground">
-                      <div className="text-[var(--ledger-income)]">
-                        売上 {yen(activePoint.revenue)}
+                    <div className="space-y-1 text-[var(--game-sub)]">
+                      <div className="text-[var(--game-income)]">
+                        うりあげ {yen(activePoint.revenue)}
                       </div>
-                      <div className="text-[var(--ledger-expense)]">
+                      <div className="text-[var(--game-expense)]">
                         事業経費 {yen(activePoint.expense)}
                       </div>
-                      <div className="text-foreground">
+                      <div className="text-[var(--game-gold)]">
                         差引利益 {yen(activePoint.profit)}
                       </div>
                       <div>利益率 {activePoint.profitRate}%</div>
@@ -418,19 +411,16 @@ export function YearlyDashboard({
               </fieldset>
             </div>
           ) : (
-            <div className="p-10 text-center text-sm text-muted-foreground">
-              この年のトレンドはまだありません
+            <div className="p-8 text-center text-sm text-[var(--game-sub)]">
+              この としの きろくは まだ ない
             </div>
           )}
-        </Card>
-      </section>
-
-      <section>
-        <div className="mb-3 text-sm font-bold tracking-[0.2em] text-muted-foreground">
-          月別利益率
         </div>
-        <Card className="overflow-hidden border-border bg-card p-0">
-          <div className="overflow-x-auto p-5">
+      </GameWindow>
+
+      <GameWindow className="px-0 pb-0" title="月別利益率">
+        <div>
+          <div className="overflow-x-auto px-4 pb-4">
             <div className="grid min-w-[40rem] grid-cols-12 items-end gap-3 sm:min-w-0">
               {summary.monthly.map((month) => {
                 const rateHeight =
@@ -443,12 +433,12 @@ export function YearlyDashboard({
                     className="flex flex-col items-center gap-2"
                     key={month.month}
                   >
-                    <div className="flex h-32 w-full items-end rounded-lg bg-[#fffdf7] px-1.5 py-2">
+                    <div className="flex h-32 w-full items-end border-2 border-[var(--game-line)]/40 bg-[var(--game-panel)] px-1.5 py-2">
                       <div
                         className={
                           month.profitRate < 0
-                            ? "w-full rounded-md bg-[var(--ledger-expense)] opacity-75"
-                            : "w-full rounded-md bg-[var(--ledger-income)] opacity-75"
+                            ? "w-full bg-[var(--game-expense)]"
+                            : "w-full bg-[var(--game-income)]"
                         }
                         style={{ height: `${rateHeight}%` }}
                       />
@@ -456,7 +446,7 @@ export function YearlyDashboard({
                     <div className="font-mono text-xs font-bold">
                       {month.profitRate}%
                     </div>
-                    <div className="text-[10px] font-bold text-muted-foreground">
+                    <div className="font-mono text-xs text-[var(--game-sub)]">
                       {month.label}
                     </div>
                   </div>
@@ -464,39 +454,36 @@ export function YearlyDashboard({
               })}
             </div>
           </div>
-        </Card>
-      </section>
-
-      <section>
-        <div className="mb-3 text-sm font-bold tracking-[0.2em] text-muted-foreground">
-          年間経費内訳（事業分）
         </div>
-        <Card className="overflow-hidden border-border bg-card p-0">
+      </GameWindow>
+
+      <GameWindow className="px-0 pb-1" title="年間経費内訳（事業分）">
+        <div>
           {summary.byCategory.length > 0 ? (
             summary.byCategory.map((item) => (
               <div
-                className="grid grid-cols-[6.5rem_1fr_auto] items-center gap-3 border-b border-border px-5 py-3 last:border-b-0"
+                className="grid grid-cols-[6.5rem_1fr_auto] items-center gap-3 border-b-2 border-dashed border-[var(--game-line)]/25 px-4 py-3 last:border-b-0"
                 key={item.code}
               >
-                <span className="text-sm font-bold">{item.name}</span>
-                <span className="relative h-1.5 overflow-hidden rounded-full bg-[rgb(168_84_58_/_16%)]">
+                <span className="text-sm">{item.name}</span>
+                <span className="relative h-2.5 overflow-hidden border border-[var(--game-line)]/60 bg-[var(--game-panel)]">
                   <span
-                    className="absolute inset-y-0 left-0 rounded-full bg-[var(--ledger-expense)] opacity-75"
+                    className="absolute inset-y-0 left-0 bg-[var(--game-expense)]"
                     style={{ width: `${(item.amount / maxCategory) * 100}%` }}
                   />
                 </span>
-                <span className="font-mono text-sm font-bold text-[var(--ledger-expense)]">
+                <span className="font-mono text-sm font-bold text-[var(--game-expense)]">
                   {yen(item.amount)}
                 </span>
               </div>
             ))
           ) : (
-            <div className="p-10 text-center text-sm text-muted-foreground">
-              この年の経費はありません
+            <div className="p-8 text-center text-sm text-[var(--game-sub)]">
+              この としの けいひは まだ ない
             </div>
           )}
-        </Card>
-      </section>
+        </div>
+      </GameWindow>
     </div>
   );
 }

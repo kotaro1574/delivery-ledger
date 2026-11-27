@@ -20,7 +20,7 @@ export function SlimeCharacter({
         .grid
     : composeEgg();
   const label = level
-    ? `Lv.${level.level} ${level.title}の配達スライム`
+    ? `Lv.${level.level} ${level.title}の はいたつスライム`
     : "スライムのたまご";
 
   return (

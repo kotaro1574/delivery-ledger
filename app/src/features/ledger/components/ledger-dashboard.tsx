@@ -17,6 +17,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { ja } from "react-day-picker/locale";
 import { toast } from "sonner";
+import { GameWindow } from "@/components/game/game-window";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Card } from "@/components/ui/card";
@@ -202,14 +203,16 @@ export function LedgerDashboard({
       });
 
       if (!response.ok) {
-        throw new Error("更新に失敗した");
+        throw new Error("かきかえられなかった…");
       }
 
-      toast.success("更新した");
+      toast.success("かきかえた！");
       closeEdit();
       router.refresh();
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "更新に失敗した");
+      toast.error(
+        error instanceof Error ? error.message : "かきかえられなかった…",
+      );
     } finally {
       setSaving(false);
     }
@@ -229,40 +232,40 @@ export function LedgerDashboard({
       });
 
       if (!response.ok) {
-        throw new Error("削除に失敗した");
+        throw new Error("けせなかった…");
       }
 
-      toast.success("削除した");
+      toast.success("けした");
       setConfirmingDelete(null);
       router.refresh();
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "削除に失敗した");
+      toast.error(error instanceof Error ? error.message : "けせなかった…");
     } finally {
       setDeleting(false);
     }
   };
 
   return (
-    <div className="space-y-7">
+    <div className="space-y-6">
       <div className="flex items-center justify-between gap-4">
-        <div className="text-sm font-bold tracking-[0.2em] text-muted-foreground">
-          MONTHLY LEDGER
+        <div className="text-sm tracking-[0.2em] text-[var(--game-sub)]">
+          つきの きろく
         </div>
         <div className="flex items-center gap-3">
           <Link
             href={`/?month=${moveMonth(month, -1)}`}
-            aria-label="前の月"
-            className="grid size-9 place-items-center rounded-lg border border-border bg-card transition hover:bg-accent"
+            aria-label="まえの つき"
+            className="grid size-9 place-items-center rounded-[4px] border-2 border-[var(--game-line)] transition hover:text-[var(--game-gold)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--game-gold)]"
           >
             <ChevronLeft className="size-4" />
           </Link>
-          <div className="min-w-28 text-center font-mono text-base font-bold">
+          <div className="min-w-28 text-center font-mono text-base font-bold text-[var(--game-gold)]">
             {displayMonth(month)}
           </div>
           <Link
             href={`/?month=${moveMonth(month, 1)}`}
-            aria-label="次の月"
-            className="grid size-9 place-items-center rounded-lg border border-border bg-card transition hover:bg-accent"
+            aria-label="つぎの つき"
+            className="grid size-9 place-items-center rounded-[4px] border-2 border-[var(--game-line)] transition hover:text-[var(--game-gold)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--game-gold)]"
           >
             <ChevronRight className="size-4" />
           </Link>
@@ -289,136 +292,130 @@ export function LedgerDashboard({
         today={parseDateString(today)}
       />
 
-      <section className="grid overflow-hidden rounded-xl border border-border bg-border sm:grid-cols-3">
-        <div className="bg-card p-5">
-          <div className="mb-2 text-xs tracking-widest text-muted-foreground">
-            売上（収入）
+      <GameWindow className="grid gap-4 sm:grid-cols-3" title="しゅうし">
+        <div>
+          <div className="mb-1 text-xs tracking-widest text-[var(--game-sub)]">
+            うりあげ
           </div>
-          <div className="font-mono text-2xl font-bold text-[var(--ledger-income)]">
+          <div className="font-mono text-2xl font-bold text-[var(--game-income)]">
             {yen(summary.revenue)}
           </div>
         </div>
-        <div className="bg-card p-5">
-          <div className="mb-2 text-xs tracking-widest text-muted-foreground">
+        <div>
+          <div className="mb-1 text-xs tracking-widest text-[var(--game-sub)]">
             経費（事業分）
           </div>
-          <div className="font-mono text-2xl font-bold text-[var(--ledger-expense)]">
+          <div className="font-mono text-2xl font-bold text-[var(--game-expense)]">
             {yen(summary.expense)}
           </div>
           {showExpenseBreakdown ? (
-            <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs font-bold text-muted-foreground">
+            <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 font-mono text-xs text-[var(--game-sub)]">
               <span>支払総額 {yen(summary.paidExpense)}</span>
               <span>私用分 {yen(privateExpense)}</span>
             </div>
           ) : null}
         </div>
-        <div className="bg-[#fffdf7] p-5">
-          <div className="mb-2 text-xs tracking-widest text-muted-foreground">
+        <div>
+          <div className="mb-1 text-xs tracking-widest text-[var(--game-sub)]">
             差引利益
           </div>
-          <div className="font-mono text-3xl font-bold">
+          <div className="font-mono text-3xl font-bold text-[var(--game-gold)]">
             {yen(summary.profit)}
           </div>
         </div>
-      </section>
+      </GameWindow>
 
       <DailyTrendCard entries={entries} month={month} />
 
-      <section>
-        <div className="mb-3 text-sm font-bold tracking-[0.2em] text-muted-foreground">
-          経費内訳（事業分）
-        </div>
-        <Card className="overflow-hidden border-border bg-card p-0">
+      <GameWindow className="px-0 pb-1" title="経費内訳（事業分）">
+        <div>
           {summary.byCategory.length > 0 ? (
             summary.byCategory.map((item) => (
               <div
-                className="grid grid-cols-[6.5rem_1fr_auto] items-center gap-3 border-b border-border px-5 py-3 last:border-b-0"
+                className="grid grid-cols-[6.5rem_1fr_auto] items-center gap-3 border-b-2 border-dashed border-[var(--game-line)]/25 px-4 py-3 last:border-b-0"
                 key={item.code}
               >
-                <span className="text-sm font-bold">{item.name}</span>
-                <span className="relative h-1.5 overflow-hidden rounded-full bg-[rgb(168_84_58_/_16%)]">
+                <span className="text-sm">{item.name}</span>
+                <span className="relative h-2.5 overflow-hidden border border-[var(--game-line)]/60 bg-[var(--game-panel)]">
                   <span
-                    className="absolute inset-y-0 left-0 rounded-full bg-[var(--ledger-expense)] opacity-75"
+                    className="absolute inset-y-0 left-0 bg-[var(--game-expense)]"
                     style={{ width: `${(item.amount / maxCategory) * 100}%` }}
                   />
                 </span>
-                <span className="font-mono text-sm font-bold text-[var(--ledger-expense)]">
+                <span className="font-mono text-sm font-bold text-[var(--game-expense)]">
                   {yen(item.amount)}
                 </span>
               </div>
             ))
           ) : (
-            <div className="p-10 text-center text-sm text-muted-foreground">
-              この月の経費はありません
+            <div className="p-8 text-center text-sm text-[var(--game-sub)]">
+              この つきの けいひは まだ ない
             </div>
           )}
-        </Card>
-      </section>
+        </div>
+      </GameWindow>
 
-      <section className="grid gap-3 sm:grid-cols-2">
-        <Card className="border-border bg-[#fffdf7] p-5">
-          <div className="mb-2 text-xs tracking-widest text-muted-foreground">
-            平均時給
+      <GameWindow className="grid grid-cols-2 gap-4" title="つよさ">
+        <div>
+          <div className="mb-1 text-xs tracking-widest text-[var(--game-sub)]">
+            じきゅう
           </div>
           <div className="font-mono text-2xl font-bold">
             {yen(summary.metrics.wagePerHour)}
           </div>
-        </Card>
-        <Card className="border-border bg-[#fffdf7] p-5">
-          <div className="mb-2 text-xs tracking-widest text-muted-foreground">
-            1件あたり
+        </div>
+        <div>
+          <div className="mb-1 text-xs tracking-widest text-[var(--game-sub)]">
+            1けん あたり
           </div>
           <div className="font-mono text-2xl font-bold">
             {yen(summary.metrics.perDelivery)}
           </div>
-          <div className="mt-1 text-xs text-muted-foreground">
+          <div className="mt-1 font-mono text-xs text-[var(--game-sub)]">
             {summary.metrics.deliveries}件
           </div>
-        </Card>
-        <Card className="border-border bg-[#fffdf7] p-5">
-          <div className="mb-2 text-xs tracking-widest text-muted-foreground">
-            稼働日数
+        </div>
+        <div>
+          <div className="mb-1 text-xs tracking-widest text-[var(--game-sub)]">
+            はたらいた ひかず
           </div>
           <div className="font-mono text-2xl font-bold">
             {summary.metrics.workDays}日
           </div>
-        </Card>
-        <Card className="border-border bg-[#fffdf7] p-5">
-          <div className="mb-2 text-xs tracking-widest text-muted-foreground">
-            稼働時間
+        </div>
+        <div>
+          <div className="mb-1 text-xs tracking-widest text-[var(--game-sub)]">
+            はたらいた じかん
           </div>
           <div className="font-mono text-2xl font-bold">
             {summary.metrics.onlineHours}時間
           </div>
-        </Card>
-      </section>
-
-      <section>
-        <div className="mb-3 text-sm font-bold tracking-[0.2em] text-muted-foreground">
-          日々の取引
         </div>
-        <Card className="overflow-hidden border-border bg-card p-0">
+      </GameWindow>
+
+      <GameWindow className="px-0 pb-1" title="まいにちの とりひき">
+        <div>
           {entries.length > 0 ? (
             entries.map((entry) => (
               <div
-                className="grid grid-cols-[4.75rem_minmax(0,1fr)_auto_auto] items-center gap-3 border-b border-border px-5 py-3 last:border-b-0"
+                className="grid grid-cols-[4.75rem_minmax(0,1fr)_auto_auto] items-center gap-3 border-b-2 border-dashed border-[var(--game-line)]/25 px-4 py-3 last:border-b-0"
                 key={entry.id}
               >
-                <span className="font-mono text-sm font-bold text-muted-foreground">
+                <span className="font-mono text-sm font-bold text-[var(--game-sub)]">
                   {displayEntryDate(entry.date)}
                 </span>
                 <span className="min-w-0">
-                  <span className="block truncate text-sm font-bold">
+                  <span className="block truncate text-sm">
                     {entry.description}
                   </span>
-                  <span className="block text-xs tracking-wide text-muted-foreground">
+                  <span className="block text-xs tracking-wide text-[var(--game-sub)]">
                     {entry.category}
                   </span>
                   {entry.kind === "expense" &&
                   entry.businessAmount !== null &&
                   entry.privateAmount !== null &&
                   entry.privateAmount > 0 ? (
-                    <span className="mt-1 block text-xs font-bold text-muted-foreground">
+                    <span className="mt-1 block font-mono text-xs text-[var(--game-sub)]">
                       事業分 {yen(entry.businessAmount)} / 私用分{" "}
                       {yen(entry.privateAmount)}
                     </span>
@@ -427,8 +424,8 @@ export function LedgerDashboard({
                 <span
                   className={
                     entry.kind === "income"
-                      ? "font-mono text-sm font-bold text-[var(--ledger-income)]"
-                      : "font-mono text-sm font-bold text-[var(--ledger-expense)]"
+                      ? "font-mono text-sm font-bold text-[var(--game-income)]"
+                      : "font-mono text-sm font-bold text-[var(--game-expense)]"
                   }
                 >
                   {entry.kind === "income" ? "+" : "-"}
@@ -436,16 +433,16 @@ export function LedgerDashboard({
                 </span>
                 <span className="flex items-center justify-end gap-1">
                   <button
-                    aria-label={`編集 ${entry.description}`}
-                    className="grid size-8 place-items-center rounded-lg border border-border bg-background transition hover:bg-accent"
+                    aria-label={`なおす ${entry.description}`}
+                    className="grid size-8 place-items-center rounded-[4px] border-2 border-[var(--game-line)] bg-transparent transition hover:bg-accent"
                     onClick={() => openEdit(entry)}
                     type="button"
                   >
                     <Pencil className="size-4" />
                   </button>
                   <button
-                    aria-label={`削除 ${entry.description}`}
-                    className="grid size-8 place-items-center rounded-lg border border-border bg-background text-[var(--ledger-expense)] transition hover:bg-accent"
+                    aria-label={`けす ${entry.description}`}
+                    className="grid size-8 place-items-center rounded-[4px] border-2 border-[var(--game-line)] bg-transparent text-[var(--game-expense)] transition hover:bg-accent"
                     onClick={() => setConfirmingDelete(entry)}
                     type="button"
                   >
@@ -455,31 +452,31 @@ export function LedgerDashboard({
               </div>
             ))
           ) : (
-            <div className="p-10 text-center text-sm text-muted-foreground">
-              この月の取引はありません
+            <div className="p-8 text-center text-sm text-[var(--game-sub)]">
+              この つきの とりひきは まだ ない
             </div>
           )}
-        </Card>
-      </section>
+        </div>
+      </GameWindow>
 
       {editing && form ? (
-        <div className="fixed inset-0 z-50 grid place-items-center bg-black/30 p-4">
+        <div className="fixed inset-0 z-50 grid place-items-center bg-black/70 p-4">
           <Card
             aria-modal="true"
-            className="max-h-[90vh] w-full max-w-md overflow-y-auto border-border bg-card p-5"
+            className="max-h-[90vh] w-full max-w-md overflow-y-auto p-5"
             role="dialog"
           >
             <div className="mb-5 flex items-start justify-between gap-3">
               <div>
-                <div className="font-serif text-xl font-bold">取引編集</div>
-                <div className="mt-1 text-xs tracking-[0.18em] text-muted-foreground">
-                  {editing.kind === "income" ? "収入" : "経費"} ·{" "}
+                <div className="text-xl">とりひきを なおす</div>
+                <div className="mt-1 text-xs tracking-[0.18em] text-[var(--game-sub)]">
+                  {editing.kind === "income" ? "しゅうにゅう" : "けいひ"} ·{" "}
                   {editing.category}
                 </div>
               </div>
               <button
-                aria-label="閉じる"
-                className="grid size-8 place-items-center rounded-lg border border-border bg-background transition hover:bg-accent"
+                aria-label="とじる"
+                className="grid size-8 place-items-center rounded-[4px] border-2 border-[var(--game-line)] bg-transparent transition hover:bg-accent"
                 onClick={closeEdit}
                 type="button"
               >
@@ -490,20 +487,20 @@ export function LedgerDashboard({
             <div className="space-y-4">
               <div>
                 <label
-                  className="mb-2 block text-xs tracking-widest text-muted-foreground"
+                  className="mb-2 block text-xs tracking-widest text-[var(--game-sub)]"
                   htmlFor="edit-date"
                 >
-                  稼働日
+                  はたらいた ひ
                 </label>
                 <Popover onOpenChange={setDateOpen} open={dateOpen}>
                   <PopoverTrigger asChild>
                     <Button
-                      className="w-full justify-start bg-background font-mono font-normal"
+                      className="w-full justify-start border-2 bg-transparent font-mono font-normal"
                       id="edit-date"
                       type="button"
                       variant="outline"
                     >
-                      <CalendarIcon className="size-4 text-muted-foreground" />
+                      <CalendarIcon className="size-4 text-[var(--game-sub)]" />
                       {formatDateLabel(form.date)}
                     </Button>
                   </PopoverTrigger>
@@ -527,15 +524,17 @@ export function LedgerDashboard({
 
               <div>
                 <label
-                  className="mb-2 block text-xs tracking-widest text-muted-foreground"
+                  className="mb-2 block text-xs tracking-widest text-[var(--game-sub)]"
                   htmlFor="edit-amount"
                 >
-                  {editing.kind === "income" ? "売上" : "金額"}
+                  {editing.kind === "income" ? "うりあげ" : "きんがく"}
                 </label>
                 <div className="flex items-baseline gap-2 border-b-2 border-border px-1 pb-3">
-                  <span className="text-2xl text-muted-foreground">¥</span>
+                  <span className="font-mono text-2xl text-[var(--game-sub)]">
+                    ¥
+                  </span>
                   <input
-                    className="w-full bg-transparent font-mono text-4xl font-bold outline-none placeholder:text-[#cfc7b4]"
+                    className="w-full bg-transparent font-mono text-4xl font-bold text-[var(--game-gold)] outline-none placeholder:text-[var(--game-sub)]/50"
                     id="edit-amount"
                     inputMode="numeric"
                     onChange={(event) =>
@@ -555,12 +554,12 @@ export function LedgerDashboard({
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label
-                      className="mb-1 block text-xs text-muted-foreground"
+                      className="mb-1 block text-xs text-[var(--game-sub)]"
                       htmlFor="edit-deliveries"
                     >
-                      件数
+                      けんすう
                     </label>
-                    <div className="flex h-12 items-center rounded-lg border border-border bg-background px-3 py-2">
+                    <div className="flex h-12 items-center rounded-[4px] border-2 border-[var(--game-line)] bg-transparent px-3 py-2">
                       <Input
                         className="h-auto min-w-0 border-0 bg-transparent p-0 font-mono shadow-none focus-visible:ring-0"
                         id="edit-deliveries"
@@ -573,18 +572,18 @@ export function LedgerDashboard({
                         placeholder="0"
                         value={form.deliveries}
                       />
-                      <span className="shrink-0 whitespace-nowrap text-xs text-muted-foreground">
+                      <span className="shrink-0 whitespace-nowrap text-xs text-[var(--game-sub)]">
                         件
                       </span>
                     </div>
                   </div>
                   <div>
-                    <div className="mb-1 text-xs text-muted-foreground">
-                      オンライン時間
+                    <div className="mb-1 text-xs text-[var(--game-sub)]">
+                      オンライン じかん
                     </div>
                     <div className="grid grid-cols-2 gap-2">
                       <label
-                        className="flex h-12 items-center rounded-lg border border-border bg-background px-3 py-2"
+                        className="flex h-12 items-center rounded-[4px] border-2 border-[var(--game-line)] bg-transparent px-3 py-2"
                         htmlFor="edit-online-hours"
                       >
                         <Input
@@ -599,12 +598,12 @@ export function LedgerDashboard({
                           placeholder="0"
                           value={form.onlineHours}
                         />
-                        <span className="shrink-0 whitespace-nowrap text-xs text-muted-foreground">
+                        <span className="shrink-0 whitespace-nowrap text-xs text-[var(--game-sub)]">
                           時間
                         </span>
                       </label>
                       <label
-                        className="flex h-12 items-center rounded-lg border border-border bg-background px-3 py-2"
+                        className="flex h-12 items-center rounded-[4px] border-2 border-[var(--game-line)] bg-transparent px-3 py-2"
                         htmlFor="edit-online-minutes"
                       >
                         <Input
@@ -620,7 +619,7 @@ export function LedgerDashboard({
                           placeholder="0"
                           value={form.onlineMinutes}
                         />
-                        <span className="shrink-0 whitespace-nowrap text-xs text-muted-foreground">
+                        <span className="shrink-0 whitespace-nowrap text-xs text-[var(--game-sub)]">
                           分
                         </span>
                       </label>
@@ -629,16 +628,16 @@ export function LedgerDashboard({
                 </div>
               ) : (
                 <div>
-                  <div className="mb-2 text-xs tracking-widest text-muted-foreground">
+                  <div className="mb-2 text-xs tracking-widest text-[var(--game-sub)]">
                     カテゴリ
                   </div>
                   <div className="flex flex-wrap gap-2">
                     {expenseCategories.map((category) => (
                       <button
                         className={cn(
-                          "rounded-lg border border-border bg-background px-3 py-2 text-sm font-bold transition hover:bg-accent",
+                          "rounded-[4px] border-2 border-[var(--game-line)] bg-transparent px-3 py-2 text-sm font-bold transition hover:bg-accent",
                           form.categoryCode === category.code &&
-                            "border-primary bg-primary text-primary-foreground",
+                            "border-[var(--game-gold)] text-[var(--game-gold)]",
                         )}
                         key={category.code}
                         onClick={() =>
@@ -655,10 +654,10 @@ export function LedgerDashboard({
 
               {editing.kind === "expense" && form.receiptKey ? (
                 <div>
-                  <div className="mb-2 text-xs tracking-widest text-muted-foreground">
+                  <div className="mb-2 text-xs tracking-widest text-[var(--game-sub)]">
                     レシート画像
                   </div>
-                  <div className="flex justify-center overflow-hidden rounded-lg border border-border bg-background p-3">
+                  <div className="flex justify-center overflow-hidden rounded-[4px] border-2 border-[var(--game-line)] bg-transparent p-3">
                     <Image
                       alt={`${editing.description}のレシート画像`}
                       className="h-auto max-h-72 w-auto max-w-full object-contain"
@@ -675,18 +674,19 @@ export function LedgerDashboard({
               <Textarea
                 className="bg-background"
                 onChange={(event) => updateForm({ memo: event.target.value })}
-                placeholder="メモ（任意）"
+                placeholder="メモ（なくても OK）"
                 value={form.memo}
               />
 
               <Button
-                className="h-11 w-full font-bold tracking-widest"
+                className="h-11 w-full tracking-widest"
                 disabled={!Number.parseInt(form.amount || "0", 10) || saving}
                 onClick={handleUpdate}
                 type="button"
+                variant="gamePrimary"
               >
                 {saving ? <Loader2 className="size-4 animate-spin" /> : null}
-                更新する
+                かきかえる
               </Button>
             </div>
           </Card>
@@ -694,33 +694,29 @@ export function LedgerDashboard({
       ) : null}
 
       {confirmingDelete ? (
-        <div className="fixed inset-0 z-50 grid place-items-center bg-black/30 p-4">
-          <Card
-            aria-modal="true"
-            className="w-full max-w-sm border-border bg-card p-5"
-            role="dialog"
-          >
-            <div className="font-serif text-xl font-bold">取引を削除</div>
-            <div className="mt-2 text-sm text-muted-foreground">
-              {confirmingDelete.description} を削除する
+        <div className="fixed inset-0 z-50 grid place-items-center bg-black/70 p-4">
+          <Card aria-modal="true" className="w-full max-w-sm p-5" role="dialog">
+            <div className="text-xl">とりひきを けす</div>
+            <div className="mt-2 text-sm text-[var(--game-sub)]">
+              {confirmingDelete.description} を けす？
             </div>
             <div className="mt-5 grid grid-cols-2 gap-2">
               <Button
                 disabled={deleting}
                 onClick={() => setConfirmingDelete(null)}
                 type="button"
-                variant="outline"
+                variant="game"
               >
-                キャンセル
+                やめる
               </Button>
               <Button
-                className="bg-[var(--ledger-expense)] hover:bg-[var(--ledger-expense)]/90"
+                className="rounded-[4px] border-2 border-[var(--game-line)] bg-[var(--game-expense)] text-[var(--game-bg)] hover:bg-[var(--game-expense)]/90"
                 disabled={deleting}
                 onClick={handleDelete}
                 type="button"
               >
                 {deleting ? <Loader2 className="size-4 animate-spin" /> : null}
-                削除する
+                けす
               </Button>
             </div>
           </Card>

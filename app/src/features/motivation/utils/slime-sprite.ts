@@ -12,7 +12,8 @@ export type PixelRun = { x: number; y: number; width: number; color: string };
 
 const SIZE = 32;
 
-const INK = "#22201a";
+const INK = "#100c22";
+const VEHICLE = "#d8def8";
 const CREAM = "#fbf9f3";
 const GOLD = "#e0a83a";
 const GOLD_DARK = "#a8741e";
@@ -24,7 +25,7 @@ const PATCH = "#4fa3d9";
 const CAPE = "#b23a48";
 const METAL = "#6b665a";
 const AURA = "rgba(242, 201, 76, 0.35)";
-const SHADOW = "rgba(34, 32, 26, 0.12)";
+const SHADOW = "rgba(255, 255, 255, 0.15)";
 const GEM_COLORS = ["#4fc3f7", "#e05a7a", "#5fd068"];
 
 const bodyPalettes: Record<SlimeTier, { B: string; S: string; H: string }> = {
@@ -202,8 +203,8 @@ function sparkle(grid: PixelGrid, cx: number, cy: number) {
 }
 
 function wheel(grid: PixelGrid, cx: number, cy: number, radius: number) {
-  ring(grid, cx, cy, radius, INK);
-  setPixel(grid, cx, cy, INK);
+  ring(grid, cx, cy, radius, VEHICLE);
+  setPixel(grid, cx, cy, VEHICLE);
 }
 
 const vehicleParts: Record<SlimeTier, string | null> = {
@@ -218,11 +219,11 @@ function drawVehicleBack(grid: PixelGrid, tier: SlimeTier) {
   if (tier === 1 || tier === 2) {
     wheel(grid, 7, 26, 4);
     wheel(grid, 25, 26, 4);
-    line(grid, [7, 26], [13, 22], INK);
-    line(grid, [13, 22], [21, 22], INK);
-    line(grid, [21, 22], [25, 26], INK);
-    line(grid, [7, 26], [16, 26], INK);
-    line(grid, [16, 26], [21, 22], INK);
+    line(grid, [7, 26], [13, 22], VEHICLE);
+    line(grid, [13, 22], [21, 22], VEHICLE);
+    line(grid, [21, 22], [25, 26], VEHICLE);
+    line(grid, [7, 26], [16, 26], VEHICLE);
+    line(grid, [16, 26], [21, 22], VEHICLE);
     if (tier === 2) {
       rect(grid, 14, 23, 3, 2, GOLD);
       line(grid, [0, 19], [3, 19], GOLD);
@@ -234,9 +235,9 @@ function drawVehicleBack(grid: PixelGrid, tier: SlimeTier) {
     wheel(grid, 8, 27, 3);
     wheel(grid, 24, 27, 3);
     rect(grid, 6, 22, 17, 3, GOLD);
-    line(grid, [6, 25], [22, 25], INK);
+    line(grid, [6, 25], [22, 25], VEHICLE);
     rect(grid, 21, 18, 4, 7, GOLD);
-    line(grid, [25, 18], [25, 24], INK);
+    line(grid, [25, 18], [25, 24], VEHICLE);
     line(grid, [0, 20], [3, 20], GOLD);
     line(grid, [0, 23], [2, 23], GOLD);
   }
@@ -247,7 +248,7 @@ function drawVehicleBack(grid: PixelGrid, tier: SlimeTier) {
     wheel(grid, 26, 26, 4);
     ring(grid, 26, 26, 2, METAL);
     rect(grid, 9, 21, 15, 3, GOLD);
-    line(grid, [10, 24], [22, 24], INK);
+    line(grid, [10, 24], [22, 24], VEHICLE);
     rect(grid, 12, 25, 7, 2, METAL);
     line(grid, [4, 23], [12, 23], METAL);
     line(grid, [0, 18], [3, 18], GOLD);
@@ -257,16 +258,16 @@ function drawVehicleBack(grid: PixelGrid, tier: SlimeTier) {
 
 function drawVehicleFront(grid: PixelGrid, tier: SlimeTier) {
   if (tier === 1 || tier === 2) {
-    line(grid, [25, 26], [24, 18], INK);
-    line(grid, [23, 17], [26, 17], INK);
+    line(grid, [25, 26], [24, 18], VEHICLE);
+    line(grid, [23, 17], [26, 17], VEHICLE);
   }
   if (tier === 3) {
-    line(grid, [24, 24], [25, 15], INK);
-    line(grid, [24, 15], [27, 15], INK);
+    line(grid, [24, 24], [25, 15], VEHICLE);
+    line(grid, [24, 15], [27, 15], VEHICLE);
   }
   if (tier === 4) {
-    line(grid, [26, 26], [25, 17], INK);
-    line(grid, [24, 17], [28, 17], INK);
+    line(grid, [26, 26], [25, 17], VEHICLE);
+    line(grid, [24, 17], [28, 17], VEHICLE);
   }
 }
 

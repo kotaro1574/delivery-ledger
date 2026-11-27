@@ -58,9 +58,9 @@ describe("YearlyDashboard", () => {
   it("年次の主要数値とグラフを表示する", () => {
     render(<YearlyDashboard summary={summary} year="2026" />);
 
-    expect(screen.getByText("YEARLY LEDGER")).toBeInTheDocument();
+    expect(screen.getByText("としの きろく")).toBeInTheDocument();
     expect(screen.getByText("2026年")).toBeInTheDocument();
-    expect(screen.getByText("年間売上")).toBeInTheDocument();
+    expect(screen.getByText("ねんかん うりあげ")).toBeInTheDocument();
     expect(screen.getByText("¥155,559")).toBeInTheDocument();
     expect(screen.getByText("事業経費")).toBeInTheDocument();
     expect(screen.getByText("¥10,564")).toBeInTheDocument();
@@ -69,7 +69,7 @@ describe("YearlyDashboard", () => {
     expect(screen.getByText("利益率")).toBeInTheDocument();
     expect(screen.getByText("93%")).toBeInTheDocument();
     expect(
-      screen.getByLabelText("2026年の月別収支トレンド"),
+      screen.getByLabelText("2026年の つきごとの しゅうし"),
     ).toBeInTheDocument();
     expect(screen.getByText("月別利益率")).toBeInTheDocument();
   });
@@ -83,7 +83,7 @@ describe("YearlyDashboard", () => {
 
     const tooltip = screen.getByRole("tooltip");
     expect(within(tooltip).getByText("2026年6月")).toBeInTheDocument();
-    expect(within(tooltip).getByText("売上 ¥65,559")).toBeInTheDocument();
+    expect(within(tooltip).getByText("うりあげ ¥65,559")).toBeInTheDocument();
     expect(within(tooltip).getByText("事業経費 ¥564")).toBeInTheDocument();
     expect(within(tooltip).getByText("差引利益 ¥64,995")).toBeInTheDocument();
     expect(within(tooltip).getByText("利益率 99%")).toBeInTheDocument();

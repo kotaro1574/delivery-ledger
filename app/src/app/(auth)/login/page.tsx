@@ -51,29 +51,29 @@ function LoginForm() {
       });
 
       if (result.error) {
-        setError("メールアドレスかパスワードが違うっぽい");
+        setError("メールアドレスか パスワードが ちがうみたい");
         setLoading(false);
         return;
       }
 
       window.location.href = callbackUrl;
     } catch {
-      setError("ログインに失敗した");
+      setError("ログインできなかった…");
       setLoading(false);
     }
   };
 
   return (
-    <Card className="border-[var(--ledger-line)] bg-[var(--ledger-card)]">
+    <Card>
       <CardHeader>
         <CardTitle>ログイン</CardTitle>
-        <CardDescription>今日の配達と経費をサクッと入れる</CardDescription>
+        <CardDescription>きょうの はいたつを きろくしよう</CardDescription>
       </CardHeader>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(handleSubmit)}>
           <CardContent className="space-y-4">
             {error ? (
-              <div className="rounded-md bg-red-50 p-3 text-sm text-red-700">
+              <div className="rounded-[4px] border-2 border-[var(--game-expense)] p-3 text-sm text-[var(--game-expense)]">
                 {error}
               </div>
             ) : null}
@@ -109,11 +109,19 @@ function LoginForm() {
             />
           </CardContent>
           <CardFooter className="flex-col gap-3 pt-6">
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "ログイン中..." : "ログイン"}
+            <Button
+              className="h-11 w-full tracking-widest"
+              disabled={loading}
+              type="submit"
+              variant="gamePrimary"
+            >
+              {loading ? "ロード中…" : "はじめる"}
             </Button>
-            <Link className="text-sm text-muted-foreground" href="/signup">
-              アカウント作成
+            <Link
+              className="inline-flex h-9 items-center text-sm text-[var(--game-sub)] hover:text-[var(--game-gold)]"
+              href="/signup"
+            >
+              あたらしく はじめる
             </Link>
           </CardFooter>
         </form>

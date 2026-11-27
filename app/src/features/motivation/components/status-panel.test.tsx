@@ -30,9 +30,9 @@ describe("StatusPanel", () => {
 
     expect(screen.getByText("Lv.25")).toBeInTheDocument();
     expect(screen.getByText("エース")).toBeInTheDocument();
-    expect(screen.getByText("次のLvまで ¥1,500")).toBeInTheDocument();
+    expect(screen.getByText("つぎのレベルまで ¥1,500")).toBeInTheDocument();
     expect(
-      screen.getByRole("img", { name: "Lv.25 エースの配達スライム" }),
+      screen.getByRole("img", { name: "Lv.25 エースの はいたつスライム" }),
     ).toBeInTheDocument();
   });
 
@@ -51,7 +51,7 @@ describe("StatusPanel", () => {
       screen.getByRole("img", { name: "スライムのたまご" }),
     ).toBeInTheDocument();
     expect(
-      screen.getByText("目標を決めるとスライムが生まれる"),
+      screen.getByText("もくひょうを きめると スライムが うまれる"),
     ).toBeInTheDocument();
   });
 
@@ -66,7 +66,7 @@ describe("StatusPanel", () => {
       />,
     );
 
-    expect(screen.getByText("キング達成 3回")).toBeInTheDocument();
+    expect(screen.getByText("キング 3回")).toBeInTheDocument();
   });
 
   it("目標を達成した月はキングになる", () => {
@@ -81,7 +81,7 @@ describe("StatusPanel", () => {
     );
 
     expect(screen.getByText("キング")).toBeInTheDocument();
-    expect(screen.getByText("目標達成！")).toBeInTheDocument();
+    expect(screen.getByText("もくひょう たっせい！")).toBeInTheDocument();
   });
 
   it("目標がない月は目標設定ボタンを出す", () => {
@@ -96,7 +96,7 @@ describe("StatusPanel", () => {
     );
 
     expect(
-      screen.getByRole("button", { name: "今月の目標を決めよう" }),
+      screen.getByRole("button", { name: "こんげつの もくひょうを きめよう" }),
     ).toBeInTheDocument();
   });
 
@@ -112,9 +112,9 @@ describe("StatusPanel", () => {
     );
 
     expect(screen.getByText("62%")).toBeInTheDocument();
-    expect(screen.getByText("¥186,000 稼いだ")).toBeInTheDocument();
+    expect(screen.getByText("かせいだ ¥186,000")).toBeInTheDocument();
     expect(screen.getByText("あと ¥114,000")).toBeInTheDocument();
-    expect(screen.getByText("1日 ¥19,000 ペース")).toBeInTheDocument();
+    expect(screen.getByText("1にち ¥19,000 ペース")).toBeInTheDocument();
   });
 
   it("過去月で達成していたら目標達成とオーバー額を出しペースは出さない", () => {
@@ -128,7 +128,7 @@ describe("StatusPanel", () => {
       />,
     );
 
-    expect(screen.getByText("目標達成！")).toBeInTheDocument();
+    expect(screen.getByText("もくひょう たっせい！")).toBeInTheDocument();
     expect(screen.getByText("+¥20,000 オーバー")).toBeInTheDocument();
     expect(screen.queryByText(/ペース/)).not.toBeInTheDocument();
   });
@@ -144,7 +144,7 @@ describe("StatusPanel", () => {
       />,
     );
 
-    expect(screen.getByText("未達 あと ¥200,000 だった")).toBeInTheDocument();
+    expect(screen.getByText("あと ¥200,000 たりなかった")).toBeInTheDocument();
   });
 
   it("目標金額を保存できる", async () => {
@@ -164,10 +164,12 @@ describe("StatusPanel", () => {
     );
 
     await userEvent.click(
-      screen.getByRole("button", { name: "今月の目標を決めよう" }),
+      screen.getByRole("button", { name: "こんげつの もくひょうを きめよう" }),
     );
-    await userEvent.type(screen.getByLabelText("目標金額"), "250000");
-    await userEvent.click(screen.getByRole("button", { name: "目標を保存" }));
+    await userEvent.type(screen.getByLabelText("もくひょうきんがく"), "250000");
+    await userEvent.click(
+      screen.getByRole("button", { name: "もくひょうを セーブ" }),
+    );
 
     await waitFor(() => expect(refresh).toHaveBeenCalled());
     expect(fetchMock).toHaveBeenCalledWith(
@@ -193,9 +195,13 @@ describe("StatusPanel", () => {
       />,
     );
 
-    await userEvent.click(screen.getByRole("button", { name: "目標を編集" }));
-    await userEvent.clear(screen.getByLabelText("目標金額"));
-    await userEvent.click(screen.getByRole("button", { name: "目標を保存" }));
+    await userEvent.click(
+      screen.getByRole("button", { name: "もくひょうを かえる" }),
+    );
+    await userEvent.clear(screen.getByLabelText("もくひょうきんがく"));
+    await userEvent.click(
+      screen.getByRole("button", { name: "もくひょうを セーブ" }),
+    );
 
     await waitFor(() => expect(refresh).toHaveBeenCalled());
     expect(fetchMock).toHaveBeenCalledWith(

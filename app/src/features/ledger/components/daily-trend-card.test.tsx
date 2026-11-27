@@ -85,7 +85,7 @@ describe("DailyTrendCard", () => {
 
     expect(
       within(screen.getByTestId("daily-trend-detail")).getByText(
-        "この日の記録はありません",
+        "この ひの きろくは ない",
       ),
     ).toBeInTheDocument();
   });
@@ -117,7 +117,16 @@ describe("DailyTrendCard", () => {
     render(<DailyTrendCard entries={[]} month="2026-06" />);
 
     expect(
-      screen.getByText("この月のトレンドはまだありません"),
+      screen.getByText("この つきの きろくは まだ ない"),
     ).toBeInTheDocument();
+  });
+
+  it("記録のない日の日付も紺の背景で読める濃さで表示する", () => {
+    render(<DailyTrendCard entries={entries} month="2026-06" />);
+
+    const day = within(
+      screen.getByRole("button", { name: "6/10(水)の収支詳細" }),
+    ).getByText("10");
+    expect(day.className).not.toMatch(/game-sub\)\]\/\d+/);
   });
 });

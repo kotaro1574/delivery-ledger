@@ -2,7 +2,7 @@
 
 import type { EntriesModel } from "@server/modules/entries/model";
 import { useState } from "react";
-import { Card } from "@/components/ui/card";
+import { GameWindow } from "@/components/game/game-window";
 import {
   buildAmountAxis,
   buildDailyTrend,
@@ -27,14 +27,14 @@ function displayMonth(month: string) {
 
 function weekdayColor(weekday: number) {
   if (weekday === SATURDAY) {
-    return "text-[var(--ledger-saturday)]";
+    return "text-[var(--game-saturday)]";
   }
 
   if (weekday === SUNDAY) {
-    return "text-[var(--ledger-sunday)]";
+    return "text-[var(--game-sunday)]";
   }
 
-  return "text-muted-foreground";
+  return "text-[var(--game-sub)]";
 }
 
 function centerPressedDay(node: HTMLDivElement | null) {
@@ -54,7 +54,7 @@ function DayDetail({ point }: { point: DailyTrendPoint }) {
   return (
     <div
       aria-live="polite"
-      className="border-t border-border bg-[#fffdf7] px-4 py-3"
+      className="border-t-2 border-dashed border-[var(--game-line)]/40 px-4 py-3"
       data-testid="daily-trend-detail"
     >
       <div className="flex items-baseline justify-between gap-3">
@@ -69,38 +69,38 @@ function DayDetail({ point }: { point: DailyTrendPoint }) {
             ({point.weekdayLabel})
           </span>
         </div>
-        <div className="text-[10px] font-bold text-muted-foreground">
-          日付をタップで切り替え
+        <div className="text-xs text-[var(--game-sub)]">
+          ひづけを タップで きりかえ
         </div>
       </div>
       {active ? (
         <dl className="mt-2 grid grid-cols-3 gap-2">
           <div>
-            <dt className="text-[10px] font-bold tracking-widest text-muted-foreground">
-              売上
+            <dt className="text-xs tracking-widest text-[var(--game-sub)]">
+              うりあげ
             </dt>
-            <dd className="font-mono text-sm font-bold text-[var(--ledger-income)]">
+            <dd className="font-mono text-sm font-bold text-[var(--game-income)]">
               {yen(point.revenue)}
             </dd>
           </div>
           <div>
-            <dt className="text-[10px] font-bold tracking-widest text-muted-foreground">
+            <dt className="text-xs tracking-widest text-[var(--game-sub)]">
               事業経費
             </dt>
-            <dd className="font-mono text-sm font-bold text-[var(--ledger-expense)]">
+            <dd className="font-mono text-sm font-bold text-[var(--game-expense)]">
               {yen(point.expense)}
             </dd>
           </div>
           <div>
-            <dt className="text-[10px] font-bold tracking-widest text-muted-foreground">
+            <dt className="text-xs tracking-widest text-[var(--game-sub)]">
               利益
             </dt>
             <dd className="font-mono text-sm font-bold">{yen(point.profit)}</dd>
           </div>
         </dl>
       ) : (
-        <p className="mt-2 text-xs font-bold text-muted-foreground">
-          この日の記録はありません
+        <p className="mt-2 text-xs text-[var(--game-sub)]">
+          この ひの きろくは ない
         </p>
       )}
     </div>
@@ -134,69 +134,59 @@ export function DailyTrendCard({
   const segments = buildProfitSegments(trend.points);
 
   return (
-    <section>
-      <div className="mb-3 flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <div className="text-sm font-bold tracking-[0.2em] text-muted-foreground">
-            DAILY TREND
-          </div>
-          <div className="mt-1 font-serif text-xl font-bold">
-            日別収支トレンド
-          </div>
-        </div>
-        <div className="flex flex-wrap gap-2 text-xs font-bold text-muted-foreground">
-          <span className="inline-flex items-center gap-1">
-            <span className="size-2 rounded-sm bg-[var(--ledger-income)]" />
-            売上
-          </span>
-          <span className="inline-flex items-center gap-1">
-            <span className="size-2 rounded-sm bg-[var(--ledger-expense)]" />
-            事業経費
-          </span>
-          <span className="inline-flex items-center gap-1">
-            <span className="h-0.5 w-4 rounded-full bg-foreground" />
-            利益
-          </span>
-        </div>
+    <GameWindow className="px-0 pb-0" title="ひごとの しゅうし">
+      <div className="flex flex-wrap justify-end gap-3 px-4 pb-2 text-xs text-[var(--game-sub)]">
+        <span className="inline-flex items-center gap-1">
+          <span className="size-2 bg-[var(--game-income)]" />
+          うりあげ
+        </span>
+        <span className="inline-flex items-center gap-1">
+          <span className="size-2 bg-[var(--game-expense)]" />
+          事業経費
+        </span>
+        <span className="inline-flex items-center gap-1">
+          <span className="h-0.5 w-4 bg-[var(--game-gold)]" />
+          利益
+        </span>
       </div>
 
-      <Card className="gap-0 overflow-hidden border-border bg-card p-0">
-        <div className="grid grid-cols-3 border-b border-border bg-[#fffdf7]">
-          <div className="border-r border-border p-3 sm:p-4">
-            <div className="mb-1 text-[10px] tracking-widest text-muted-foreground sm:text-xs">
+      <div>
+        <div className="grid grid-cols-3 border-y-2 border-dashed border-[var(--game-line)]/40">
+          <div className="border-r-2 border-dashed border-[var(--game-line)]/40 p-3 sm:p-4">
+            <div className="mb-1 text-xs tracking-widest text-[var(--game-sub)]">
               最高利益日
             </div>
             <div className="font-mono text-xl font-bold sm:text-2xl">
               {trend.bestProfitDay?.label ?? "-"}
               {trend.bestProfitDay ? (
-                <span className="ml-0.5 font-sans text-[10px] text-muted-foreground sm:text-xs">
+                <span className="ml-0.5 text-xs text-[var(--game-sub)]">
                   ({trend.bestProfitDay.weekdayLabel})
                 </span>
               ) : null}
             </div>
-            <div className="mt-1 text-[10px] font-bold text-muted-foreground sm:text-xs">
+            <div className="mt-1 font-mono text-xs text-[var(--game-sub)]">
               {yen(trend.bestProfitDay?.profit ?? 0)}
             </div>
           </div>
-          <div className="border-r border-border p-3 sm:p-4">
-            <div className="mb-1 text-[10px] tracking-widest text-muted-foreground sm:text-xs">
+          <div className="border-r-2 border-dashed border-[var(--game-line)]/40 p-3 sm:p-4">
+            <div className="mb-1 text-xs tracking-widest text-[var(--game-sub)]">
               平均利益
             </div>
             <div className="font-mono text-xl font-bold sm:text-2xl">
               {yen(trend.averageProfit)}
             </div>
-            <div className="mt-1 text-[10px] font-bold text-muted-foreground sm:text-xs">
-              稼働日の平均
+            <div className="mt-1 font-mono text-xs text-[var(--game-sub)]">
+              はたらいた ひの へいきん
             </div>
           </div>
           <div className="p-3 sm:p-4">
-            <div className="mb-1 text-[10px] tracking-widest text-muted-foreground sm:text-xs">
+            <div className="mb-1 text-xs tracking-widest text-[var(--game-sub)]">
               経費率
             </div>
             <div className="font-mono text-xl font-bold sm:text-2xl">
               {trend.expenseRate}%
             </div>
-            <div className="mt-1 text-[10px] font-bold text-muted-foreground sm:text-xs">
+            <div className="mt-1 font-mono text-xs text-[var(--game-sub)]">
               事業経費 ÷ 売上
             </div>
           </div>
@@ -209,7 +199,7 @@ export function DailyTrendCard({
                 <div className="relative h-48">
                   {axis.ticks.map((tick) => (
                     <span
-                      className="absolute right-1.5 translate-y-1/2 font-mono text-[10px] font-bold leading-none text-muted-foreground"
+                      className="absolute right-1.5 translate-y-1/2 font-mono text-[10px] font-bold leading-none text-[var(--game-sub)]"
                       key={tick}
                       style={{ bottom: `${percent(tick)}%` }}
                     >
@@ -217,19 +207,19 @@ export function DailyTrendCard({
                     </span>
                   ))}
                 </div>
-                <div className="pt-2 pr-1.5 text-right text-[10px] font-bold text-muted-foreground">
+                <div className="pt-2 pr-1.5 text-right font-mono text-[10px] font-bold text-[var(--game-sub)]">
                   {Number(month.slice(5))}月
                 </div>
               </div>
 
               <div
-                className="min-w-0 flex-1 overflow-x-auto overscroll-x-contain border-l border-border pt-4"
+                className="min-w-0 flex-1 overflow-x-auto overscroll-x-contain border-l-2 border-[var(--game-line)]/40 pt-4"
                 data-testid="daily-trend-scroll"
                 key={month}
                 ref={centerPressedDay}
               >
                 <fieldset
-                  aria-label={`${displayMonth(month)}の日別収支トレンド`}
+                  aria-label={`${displayMonth(month)}の ひごとの しゅうし`}
                   className="relative m-0 flex border-0 p-0"
                   data-testid="daily-trend-chart-area"
                   style={{ minWidth: `${trend.points.length * 2}rem` }}
@@ -243,8 +233,8 @@ export function DailyTrendCard({
                         className={cn(
                           "absolute inset-x-0 border-t",
                           tick === 0
-                            ? "border-[var(--ledger-soft)]/50"
-                            : "border-dashed border-border",
+                            ? "border-[var(--game-line)]/60"
+                            : "border-dashed border-[var(--game-line)]/20",
                         )}
                         key={tick}
                         style={{ bottom: `${percent(tick)}%` }}
@@ -262,12 +252,12 @@ export function DailyTrendCard({
                         aria-label={`${point.label}(${point.weekdayLabel})の収支詳細`}
                         aria-pressed={selected}
                         className={cn(
-                          "relative min-w-8 flex-1 basis-0 cursor-pointer outline-none transition-colors focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring/40",
-                          weekend && "bg-foreground/[0.035]",
-                          selected && "bg-foreground/[0.09]",
+                          "relative min-w-8 flex-1 basis-0 cursor-pointer outline-none transition-colors focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--game-gold)]",
+                          weekend && "bg-white/[0.04]",
+                          selected && "bg-white/[0.12]",
                           point.weekday === 1 &&
                             point.day > 1 &&
-                            "border-l border-border",
+                            "border-l border-[var(--game-line)]/20",
                         )}
                         key={point.date}
                         onClick={() => setSelectedDate(point.date)}
@@ -283,7 +273,7 @@ export function DailyTrendCard({
                           >
                             {point.revenue > 0 ? (
                               <span
-                                className="min-h-0.5 w-2.5 rounded-t-sm bg-[var(--ledger-income)] opacity-85"
+                                className="min-h-0.5 w-2.5 bg-[var(--game-income)]"
                                 style={{
                                   height: `${(point.revenue / axis.max) * 100}%`,
                                 }}
@@ -291,7 +281,7 @@ export function DailyTrendCard({
                             ) : null}
                             {point.expense > 0 ? (
                               <span
-                                className="min-h-0.5 w-1.5 rounded-t-sm bg-[var(--ledger-expense)] opacity-80"
+                                className="min-h-0.5 w-1.5 bg-[var(--game-expense)]"
                                 style={{
                                   height: `${(point.expense / axis.max) * 100}%`,
                                 }}
@@ -302,19 +292,19 @@ export function DailyTrendCard({
                         <span className="flex h-12 flex-col items-center gap-1 pt-1.5">
                           <span
                             className={cn(
-                              "flex h-5 min-w-5 items-center justify-center rounded-full px-0.5 font-mono text-xs font-bold leading-none",
+                              "flex h-5 min-w-5 items-center justify-center rounded-[2px] px-0.5 font-mono text-xs font-bold leading-none",
                               selected
-                                ? "bg-foreground text-background"
+                                ? "bg-[var(--game-gold)] text-[var(--game-bg)]"
                                 : isActiveDay(point)
                                   ? "text-foreground"
-                                  : "text-muted-foreground",
+                                  : "text-[var(--game-sub)]",
                             )}
                           >
                             {point.day}
                           </span>
                           <span
                             className={cn(
-                              "text-[10px] font-bold leading-none",
+                              "text-xs leading-none",
                               weekdayColor(point.weekday),
                             )}
                           >
@@ -335,11 +325,11 @@ export function DailyTrendCard({
                       <line
                         key={segment.from}
                         opacity={segment.bridgesRestDays ? 0.4 : 1}
-                        stroke="var(--ledger-ink)"
+                        stroke="var(--game-gold)"
                         strokeDasharray={
                           segment.bridgesRestDays ? "2 4" : undefined
                         }
-                        strokeLinecap="round"
+                        strokeLinecap="square"
                         strokeWidth={segment.bridgesRestDays ? 1.5 : 2}
                         vectorEffect="non-scaling-stroke"
                         x1={segment.from + 0.5}
@@ -362,10 +352,10 @@ export function DailyTrendCard({
                         {isActiveDay(point) ? (
                           <span
                             className={cn(
-                              "absolute left-1/2 size-2.5 -translate-x-1/2 translate-y-1/2 rounded-full border-2 border-foreground",
+                              "absolute left-1/2 size-2.5 -translate-x-1/2 translate-y-1/2 border-2 border-[var(--game-gold)]",
                               point.date === selectedPoint.date
-                                ? "bg-foreground"
-                                : "bg-[#fffdf7]",
+                                ? "bg-[var(--game-gold)]"
+                                : "bg-[var(--game-bg)]",
                             )}
                             style={{ bottom: `${percent(point.profit)}%` }}
                           />
@@ -380,11 +370,11 @@ export function DailyTrendCard({
             <DayDetail point={selectedPoint} />
           </>
         ) : (
-          <div className="p-10 text-center text-sm text-muted-foreground">
-            この月のトレンドはまだありません
+          <div className="p-8 text-center text-sm text-[var(--game-sub)]">
+            この つきの きろくは まだ ない
           </div>
         )}
-      </Card>
-    </section>
+      </div>
+    </GameWindow>
   );
 }

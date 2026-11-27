@@ -12,9 +12,9 @@ import { useRouter } from "next/navigation";
 import { useMemo, useRef, useState } from "react";
 import { ja } from "react-day-picker/locale";
 import { toast } from "sonner";
+import { GameWindow } from "@/components/game/game-window";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
-import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
   Popover,
@@ -93,7 +93,7 @@ async function uploadReceipt(file: File): Promise<string> {
   });
 
   if (!uploadResponse.ok) {
-    throw new Error("レシートのアップロードに失敗した");
+    throw new Error("レシートを アップロードできなかった…");
   }
 
   return result.key;
@@ -113,7 +113,7 @@ async function analyzeReceipt(file: File): Promise<ReceiptOcrResponse> {
     const result = (await response.json().catch(() => null)) as {
       message?: string;
     } | null;
-    throw new Error(result?.message ?? "レシートの解析に失敗した");
+    throw new Error(result?.message ?? "レシートを よみとれなかった…");
   }
 
   return response.json() as Promise<ReceiptOcrResponse>;
@@ -217,10 +217,10 @@ export function EntryInputForm() {
         setMemo(result.memo);
       }
 
-      toast.success("レシートを読み取った");
+      toast.success("レシートを よみとった！");
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : "レシートの解析に失敗した",
+        error instanceof Error ? error.message : "レシートを よみとれなかった…",
       );
     } finally {
       setAnalyzingReceipt(false);
@@ -267,21 +267,21 @@ export function EntryInputForm() {
       });
 
       if (!response.ok) {
-        throw new Error("保存に失敗した");
+        throw new Error("セーブできなかった…");
       }
 
       setRecent((items) => [
         {
           id: crypto.randomUUID(),
           mode,
-          label: mode === "income" ? "売上" : selectedCategory.name,
+          label: mode === "income" ? "うりあげ" : selectedCategory.name,
           amount: amountNumber,
           memo,
           sub:
             mode === "income"
               ? [
                   deliveryCount > 0 ? `${deliveryCount}件` : null,
-                  totalOnlineMinutes > 0 ? `時給${wage}` : null,
+                  totalOnlineMinutes > 0 ? `じきゅう${wage}` : null,
                 ]
                   .filter(Boolean)
                   .join(" · ")
@@ -293,14 +293,16 @@ export function EntryInputForm() {
         ...items,
       ]);
       resetForm();
-      toast.success("保存した");
+      toast.success("セーブした！");
       router.push(
         mode === "income"
           ? `/?month=${entryDate.slice(0, 7)}&gained=${amountNumber}`
           : "/",
       );
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "保存に失敗した");
+      toast.error(
+        error instanceof Error ? error.message : "セーブできなかった…",
+      );
     } finally {
       setSaving(false);
     }
@@ -308,55 +310,38 @@ export function EntryInputForm() {
 
   return (
     <div className="mx-auto max-w-md space-y-6">
-      <div>
-        <div className="font-serif text-2xl font-bold tracking-wide">入力</div>
-        <div className="mt-1 text-xs tracking-[0.18em] text-muted-foreground">
-          配達収支台帳 · {dateLabel}
-        </div>
-      </div>
-
-      <Card className="border-border bg-card p-5">
-        <div className="mb-4 grid grid-cols-2 gap-1 rounded-xl bg-secondary p-1">
-          <button
-            className={cn(
-              "rounded-lg px-4 py-2 text-sm font-bold text-muted-foreground transition",
-              mode === "income" &&
-                "bg-card text-[var(--ledger-income)] shadow-sm",
-            )}
-            onClick={() => selectMode("income")}
-            type="button"
-          >
-            収入
-          </button>
-          <button
-            className={cn(
-              "rounded-lg px-4 py-2 text-sm font-bold text-muted-foreground transition",
-              mode === "expense" &&
-                "bg-card text-[var(--ledger-expense)] shadow-sm",
-            )}
-            onClick={() => selectMode("expense")}
-            type="button"
-          >
-            経費
-          </button>
+      <GameWindow title="きろくする">
+        <div className="mb-5 grid grid-cols-2 gap-2">
+          <ModeButton
+            active={mode === "income"}
+            activeClassName="text-[var(--game-income)]"
+            label="しゅうにゅう"
+            onSelect={() => selectMode("income")}
+          />
+          <ModeButton
+            active={mode === "expense"}
+            activeClassName="text-[var(--game-expense)]"
+            label="けいひ"
+            onSelect={() => selectMode("expense")}
+          />
         </div>
 
         <div className="mb-5">
           <label
-            className="mb-2 block text-xs tracking-widest text-muted-foreground"
+            className="mb-2 block text-xs tracking-widest text-[var(--game-sub)]"
             htmlFor="entry-date"
           >
-            稼働日
+            はたらいた ひ
           </label>
           <Popover onOpenChange={setDateOpen} open={dateOpen}>
             <PopoverTrigger asChild>
               <Button
-                className="w-full justify-start bg-background font-mono font-normal"
+                className="w-full justify-start border-2 bg-transparent font-mono font-normal"
                 id="entry-date"
                 type="button"
                 variant="outline"
               >
-                <CalendarIcon className="size-4 text-muted-foreground" />
+                <CalendarIcon className="size-4 text-[var(--game-sub)]" />
                 {dateLabel}
               </Button>
             </PopoverTrigger>
@@ -380,15 +365,15 @@ export function EntryInputForm() {
         </div>
 
         <label
-          className="mb-2 block text-xs tracking-widest text-muted-foreground"
+          className="mb-2 block text-xs tracking-widest text-[var(--game-sub)]"
           htmlFor="entry-amount"
         >
-          {mode === "income" ? "この日の売上" : "金額"}
+          {mode === "income" ? "この ひの うりあげ" : "きんがく"}
         </label>
-        <div className="mb-5 flex items-baseline gap-2 border-b-2 border-border px-1 pb-3">
-          <span className="text-2xl text-muted-foreground">¥</span>
+        <div className="mb-5 flex items-baseline gap-2 border-b-2 border-[var(--game-line)] px-1 pb-3">
+          <span className="font-mono text-2xl text-[var(--game-sub)]">¥</span>
           <input
-            className="w-full bg-transparent font-mono text-4xl font-bold outline-none placeholder:text-[#cfc7b4]"
+            className="w-full bg-transparent font-mono text-4xl font-bold text-[var(--game-gold)] outline-none placeholder:text-[var(--game-sub)]/50"
             id="entry-amount"
             inputMode="numeric"
             onChange={(event) => {
@@ -402,16 +387,16 @@ export function EntryInputForm() {
 
         {mode === "expense" ? (
           <>
-            <div className="mb-2 text-xs tracking-widest text-muted-foreground">
+            <div className="mb-2 text-xs tracking-widest text-[var(--game-sub)]">
               カテゴリ
             </div>
             <div className="mb-3 flex flex-wrap gap-2">
               {expenseCategories.map((category) => (
                 <button
                   className={cn(
-                    "rounded-lg border border-border bg-background px-3 py-2 text-sm font-bold transition hover:bg-accent",
+                    "rounded-[4px] border-2 border-[var(--game-line)] px-3 py-2 text-sm transition hover:text-[var(--game-gold)]",
                     categoryCode === category.code &&
-                      "border-primary bg-primary text-primary-foreground",
+                      "border-[var(--game-gold)] text-[var(--game-gold)]",
                   )}
                   key={category.code}
                   onClick={() => setCategoryCode(category.code)}
@@ -422,26 +407,26 @@ export function EntryInputForm() {
               ))}
             </div>
             {selectedCategory.ratio < 100 ? (
-              <div className="mb-5 text-xs text-muted-foreground">
-                事業割合 {selectedCategory.ratio}%
-                を自動適用（私用分は事業主貸へ）
+              <div className="mb-5 font-mono text-xs text-[var(--game-sub)]">
+                事業割合 {selectedCategory.ratio}% を じどうで
+                てきよう（私用分は事業主貸へ）
               </div>
             ) : null}
           </>
         ) : (
           <>
-            <div className="mb-2 text-xs tracking-widest text-muted-foreground">
-              稼働メモ（任意）
+            <div className="mb-2 text-xs tracking-widest text-[var(--game-sub)]">
+              はたらいた きろく（なくても OK）
             </div>
             <div className="mb-4 grid grid-cols-2 gap-3">
               <div>
                 <label
-                  className="mb-1 block text-xs text-muted-foreground"
+                  className="mb-1 block text-xs text-[var(--game-sub)]"
                   htmlFor="entry-deliveries"
                 >
-                  件数
+                  けんすう
                 </label>
-                <div className="flex h-12 items-center rounded-lg border border-border bg-background px-3 py-2">
+                <div className="flex h-12 items-center rounded-[4px] border-2 border-[var(--game-line)] bg-transparent px-3 py-2">
                   <Input
                     className="h-auto min-w-0 border-0 bg-transparent p-0 font-mono shadow-none focus-visible:ring-0"
                     id="entry-deliveries"
@@ -452,18 +437,18 @@ export function EntryInputForm() {
                     placeholder="0"
                     value={deliveries}
                   />
-                  <span className="shrink-0 whitespace-nowrap text-xs text-muted-foreground">
+                  <span className="shrink-0 whitespace-nowrap text-xs text-[var(--game-sub)]">
                     件
                   </span>
                 </div>
               </div>
               <div>
-                <div className="mb-1 text-xs text-muted-foreground">
-                  オンライン時間
+                <div className="mb-1 text-xs text-[var(--game-sub)]">
+                  オンライン じかん
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                   <label
-                    className="flex h-12 items-center rounded-lg border border-border bg-background px-3 py-2"
+                    className="flex h-12 items-center rounded-[4px] border-2 border-[var(--game-line)] bg-transparent px-3 py-2"
                     htmlFor="entry-online-hours"
                   >
                     <Input
@@ -477,12 +462,12 @@ export function EntryInputForm() {
                       placeholder="0"
                       value={onlineHours}
                     />
-                    <span className="shrink-0 whitespace-nowrap text-xs text-muted-foreground">
+                    <span className="shrink-0 whitespace-nowrap text-xs text-[var(--game-sub)]">
                       時間
                     </span>
                   </label>
                   <label
-                    className="flex h-12 items-center rounded-lg border border-border bg-background px-3 py-2"
+                    className="flex h-12 items-center rounded-[4px] border-2 border-[var(--game-line)] bg-transparent px-3 py-2"
                     htmlFor="entry-online-minutes"
                   >
                     <Input
@@ -497,7 +482,7 @@ export function EntryInputForm() {
                       placeholder="0"
                       value={onlineMinutes}
                     />
-                    <span className="shrink-0 whitespace-nowrap text-xs text-muted-foreground">
+                    <span className="shrink-0 whitespace-nowrap text-xs text-[var(--game-sub)]">
                       分
                     </span>
                   </label>
@@ -505,16 +490,20 @@ export function EntryInputForm() {
               </div>
             </div>
             {showStats ? (
-              <div className="mb-5 grid grid-cols-2 overflow-hidden rounded-xl border border-border bg-border">
-                <div className="bg-[#fffdf7] p-4">
-                  <div className="mb-1 text-xs text-muted-foreground">時給</div>
-                  <div className="font-mono text-xl font-bold">{wage}</div>
-                </div>
-                <div className="bg-[#fffdf7] p-4">
-                  <div className="mb-1 text-xs text-muted-foreground">
-                    1件あたり
+              <div className="mb-5 grid grid-cols-2 gap-3 rounded-[4px] border-2 border-dashed border-[var(--game-line)]/40 p-3">
+                <div>
+                  <div className="mb-1 text-xs text-[var(--game-sub)]">
+                    じきゅう
                   </div>
-                  <div className="font-mono text-xl font-bold">
+                  <div className="font-mono text-xl font-bold text-[var(--game-gold)]">
+                    {wage}
+                  </div>
+                </div>
+                <div>
+                  <div className="mb-1 text-xs text-[var(--game-sub)]">
+                    1けん あたり
+                  </div>
+                  <div className="font-mono text-xl font-bold text-[var(--game-gold)]">
                     {perDelivery}
                   </div>
                 </div>
@@ -540,7 +529,7 @@ export function EntryInputForm() {
               disabled={analyzingReceipt}
               onClick={() => fileRef.current?.click()}
               type="button"
-              variant="outline"
+              variant="game"
             >
               {analyzingReceipt ? (
                 <Loader2 className="size-4 animate-spin" />
@@ -550,24 +539,24 @@ export function EntryInputForm() {
                 <ScanText className="size-4" />
               )}
               {analyzingReceipt
-                ? "読み取り中"
+                ? "よみとり中…"
                 : receipt
                   ? receipt.name
-                  : "レシート画像から読み取る"}
+                  : "レシートを よみとる"}
             </Button>
           </>
         ) : null}
 
         <Textarea
-          className="mb-5 bg-background"
+          className="mb-5"
           onChange={(event) => setMemo(event.target.value)}
-          placeholder="メモ（任意）"
+          placeholder="メモ（なくても OK）"
           value={memo}
         />
 
-        <div className="mb-5 border-t border-border pt-4">
+        <div className="mb-5 border-t-2 border-dashed border-[var(--game-line)]/40 pt-4">
           <button
-            className="inline-flex items-center gap-1 text-xs font-bold tracking-widest text-muted-foreground"
+            className="inline-flex h-9 items-center gap-1 text-xs tracking-widest text-[var(--game-sub)] hover:text-[var(--game-gold)]"
             onClick={() => setShowJournal((value) => !value)}
             type="button"
           >
@@ -583,7 +572,7 @@ export function EntryInputForm() {
                   className="grid grid-cols-[2.5rem_1fr_auto] gap-3 text-sm"
                   key={`${line.side}-${line.account}`}
                 >
-                  <span className="text-xs text-muted-foreground">
+                  <span className="text-xs text-[var(--game-sub)]">
                     {line.side}
                   </span>
                   <span>{line.account}</span>
@@ -595,47 +584,38 @@ export function EntryInputForm() {
         </div>
 
         <Button
-          className={cn(
-            "h-12 w-full text-base font-bold tracking-widest",
-            mode === "income"
-              ? "bg-[var(--ledger-income)] hover:bg-[var(--ledger-income)]/90"
-              : "bg-[var(--ledger-expense)] hover:bg-[var(--ledger-expense)]/90",
-          )}
+          className="h-12 w-full text-base tracking-widest"
           disabled={!amountNumber || !entryDate || saving}
           onClick={handleSave}
           type="button"
+          variant="gamePrimary"
         >
           {saving ? <Loader2 className="size-4 animate-spin" /> : null}
-          保存する
+          セーブする
         </Button>
         {saved ? (
-          <div className="mt-3 inline-flex items-center gap-1 text-sm font-bold text-[var(--ledger-income)]">
+          <div className="mt-3 inline-flex items-center gap-1 text-sm text-[var(--game-income)]">
             <Check className="size-4" />
-            保存した
+            セーブした！
           </div>
         ) : null}
-      </Card>
+      </GameWindow>
 
       {recent.length > 0 ? (
-        <section>
-          <div className="mb-3 text-sm font-bold tracking-[0.2em] text-muted-foreground">
-            最近の入力
-          </div>
-          <div className="space-y-2">
+        <GameWindow className="px-0 pb-1" title="さいきんの きろく">
+          <div>
             {recent.map((item) => (
-              <Card
-                className="grid grid-cols-[3.5rem_1fr_auto] items-center gap-3 border-border bg-card p-3"
+              <div
+                className="grid grid-cols-[3.5rem_1fr_auto] items-center gap-3 border-b-2 border-dashed border-[var(--game-line)]/25 px-4 py-3 last:border-b-0"
                 key={item.id}
               >
-                <span className="font-mono text-sm text-muted-foreground">
+                <span className="font-mono text-sm text-[var(--game-sub)]">
                   {item.date.slice(5).replace("-", "/")}
                 </span>
                 <span className="min-w-0">
-                  <span className="block truncate text-sm font-bold">
-                    {item.label}
-                  </span>
+                  <span className="block truncate text-sm">{item.label}</span>
                   {[item.sub, item.memo].filter(Boolean).length > 0 ? (
-                    <span className="block truncate text-xs text-muted-foreground">
+                    <span className="block truncate font-mono text-xs text-[var(--game-sub)]">
                       {[item.sub, item.memo].filter(Boolean).join(" · ")}
                     </span>
                   ) : null}
@@ -644,18 +624,52 @@ export function EntryInputForm() {
                   className={cn(
                     "font-mono text-sm font-bold",
                     item.mode === "income"
-                      ? "text-[var(--ledger-income)]"
-                      : "text-[var(--ledger-expense)]",
+                      ? "text-[var(--game-income)]"
+                      : "text-[var(--game-expense)]",
                   )}
                 >
                   {item.mode === "income" ? "+" : "-"}
                   {yen(item.amount).slice(1)}
                 </span>
-              </Card>
+              </div>
             ))}
           </div>
-        </section>
+        </GameWindow>
       ) : null}
     </div>
+  );
+}
+
+function ModeButton({
+  active,
+  activeClassName,
+  label,
+  onSelect,
+}: {
+  active: boolean;
+  activeClassName: string;
+  label: string;
+  onSelect: () => void;
+}) {
+  return (
+    <button
+      aria-pressed={active}
+      className={cn(
+        "inline-flex h-11 items-center justify-center gap-1 rounded-[4px] border-2 text-sm transition outline-none focus-visible:ring-2 focus-visible:ring-[var(--game-gold)]",
+        active
+          ? cn("border-[var(--game-line)]", activeClassName)
+          : "border-[var(--game-line)]/30 text-[var(--game-sub)] hover:text-[var(--game-line)]",
+      )}
+      onClick={onSelect}
+      type="button"
+    >
+      <span
+        aria-hidden="true"
+        className={cn("w-3 text-xs", !active && "invisible")}
+      >
+        ▶
+      </span>
+      {label}
+    </button>
   );
 }
