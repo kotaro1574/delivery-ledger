@@ -1,6 +1,7 @@
 "use client";
 
 import type { EntriesModel } from "@server/modules/entries/model";
+import type { SummaryModel } from "@server/modules/summary/model";
 import { useState } from "react";
 import { GameWindow } from "@/components/game/game-window";
 import {
@@ -48,7 +49,57 @@ function centerPressedDay(node: HTMLDivElement | null) {
     pressed.offsetLeft - (node.clientWidth - pressed.offsetWidth) / 2;
 }
 
-function DayDetail({ point }: { point: DailyTrendPoint }) {
+function workTime(minutes: number) {
+  const hours = Math.floor(minutes / 60);
+  const rest = minutes % 60;
+  if (hours === 0) return `${rest}分`;
+  return rest === 0 ? `${hours}時間` : `${hours}時間${rest}分`;
+}
+
+function WorkDetail({
+  revenue,
+  work,
+}: {
+  revenue: number;
+  work: SummaryModel.DailyStat;
+}) {
+  return (
+    <dl className="mt-2 grid grid-cols-3 gap-2 border-t border-dashed border-[var(--game-line)]/25 pt-2">
+      <div>
+        <dt className="text-xs tracking-widest text-[var(--game-sub)]">
+          はたらいた じかん
+        </dt>
+        <dd className="font-mono text-sm font-bold">
+          {work.onlineMinutes > 0 ? workTime(work.onlineMinutes) : "—"}
+        </dd>
+      </div>
+      <div>
+        <dt className="text-xs tracking-widest text-[var(--game-sub)]">
+          じきゅう
+        </dt>
+        <dd className="font-mono text-sm font-bold text-[var(--game-gold)]">
+          {work.onlineMinutes > 0
+            ? yen(revenue / (work.onlineMinutes / 60))
+            : "—"}
+        </dd>
+      </div>
+      <div>
+        <dt className="text-xs tracking-widest text-[var(--game-sub)]">
+          はいたつ けんすう
+        </dt>
+        <dd className="font-mono text-sm font-bold">{work.deliveries}件</dd>
+      </div>
+    </dl>
+  );
+}
+
+function DayDetail({
+  point,
+  work,
+}: {
+  point: DailyTrendPoint;
+  work: SummaryModel.DailyStat | undefined;
+}) {
   const active = isActiveDay(point);
 
   return (
@@ -98,7 +149,11 @@ function DayDetail({ point }: { point: DailyTrendPoint }) {
             <dd className="font-mono text-sm font-bold">{yen(point.profit)}</dd>
           </div>
         </dl>
-      ) : (
+      ) : null}
+      {active && work ? (
+        <WorkDetail revenue={point.revenue} work={work} />
+      ) : null}
+      {active ? null : (
         <p className="mt-2 text-xs text-[var(--game-sub)]">
           この ひの きろくは ない
         </p>
@@ -110,9 +165,11 @@ function DayDetail({ point }: { point: DailyTrendPoint }) {
 export function DailyTrendCard({
   month,
   entries,
+  stats,
 }: {
   month: string;
   entries: EntriesModel.Item[];
+  stats: SummaryModel.DailyStat[];
 }) {
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const trend = buildDailyTrend(month, entries);
@@ -367,7 +424,10 @@ export function DailyTrendCard({
               </div>
             </div>
 
-            <DayDetail point={selectedPoint} />
+            <DayDetail
+              point={selectedPoint}
+              work={stats.find((stat) => stat.date === selectedPoint.date)}
+            />
           </>
         ) : (
           <div className="p-8 text-center text-sm text-[var(--game-sub)]">

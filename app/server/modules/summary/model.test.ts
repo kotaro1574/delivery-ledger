@@ -19,6 +19,9 @@ describe("SummaryModel", () => {
           onlineHours: 0,
           workDays: 0,
         },
+        dailyStats: [
+          { date: "2026-06-09", deliveries: 12, onlineMinutes: 240 },
+        ],
       }),
     ).toEqual({
       revenue: 65559,
@@ -35,6 +38,7 @@ describe("SummaryModel", () => {
         onlineHours: 0,
         workDays: 0,
       },
+      dailyStats: [{ date: "2026-06-09", deliveries: 12, onlineMinutes: 240 }],
     });
   });
 

@@ -24,6 +24,7 @@ const summary = {
     onlineHours: 4.5,
     workDays: 12,
   },
+  dailyStats: [],
 };
 
 describe("LedgerDashboard", () => {

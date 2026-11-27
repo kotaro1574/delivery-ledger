@@ -8,6 +8,7 @@ import {
 } from "@server/db/schema";
 import { and, eq, like, sql } from "drizzle-orm";
 import { GoalsService } from "../goals/service";
+import { buildDailyStats } from "./daily-stats";
 import { countKingMonths } from "./king-months";
 import { calculateMetrics } from "./metrics";
 import type { SummaryModel } from "./model";
@@ -140,6 +141,17 @@ export const SummaryService = {
     const revenue = revenueResult[0]?.total ?? 0;
     const expense = expenseResult[0]?.total ?? 0;
     const paidExpense = paidExpenseResult[0]?.total ?? 0;
+    const dayStats = buildDailyStats({
+      detailRows: detailStatsRows,
+      legacyRows: legacyStatsRows,
+    });
+    const stats = dayStats.reduce(
+      (total, row) => ({
+        deliveries: total.deliveries + row.deliveries,
+        onlineMinutes: total.onlineMinutes + row.onlineMinutes,
+      }),
+      { deliveries: 0, onlineMinutes: 0 },
+    );
     const detailDatesWithStats = new Set(
       detailStatsRows
         .filter(
@@ -147,27 +159,9 @@ export const SummaryService = {
         )
         .map((row) => row.date),
     );
-    const detailStats = detailStatsRows.reduce(
-      (total, row) => ({
-        deliveries: total.deliveries + (row.deliveries ?? 0),
-        onlineMinutes: total.onlineMinutes + (row.onlineMinutes ?? 0),
-      }),
-      { deliveries: 0, onlineMinutes: 0 },
-    );
     const legacyRows = legacyStatsRows.filter(
       (row) => !detailDatesWithStats.has(row.date),
     );
-    const legacyStats = legacyRows.reduce(
-      (total, row) => ({
-        deliveries: total.deliveries + (row.deliveries ?? 0),
-        onlineMinutes: total.onlineMinutes + (row.onlineMinutes ?? 0),
-      }),
-      { deliveries: 0, onlineMinutes: 0 },
-    );
-    const stats = {
-      deliveries: detailStats.deliveries + legacyStats.deliveries,
-      onlineMinutes: detailStats.onlineMinutes + legacyStats.onlineMinutes,
-    };
     const workDays = countWorkDays({
       detailDates: detailStatsRows.map((row) => row.date),
       legacyStats: legacyRows,
@@ -187,6 +181,7 @@ export const SummaryService = {
         onlineMinutes: stats.onlineMinutes ?? 0,
         workDays,
       }),
+      dailyStats: dayStats,
     };
   },
 
