@@ -34,7 +34,7 @@ export function CelebrationBanner({
     <section
       aria-live="polite"
       className={cn(
-        "relative rounded-[4px] border-[3px] bg-[var(--game-bg)] p-4 pr-12 shadow-[0_0_0_3px_var(--game-bg)] motion-safe:animate-[celebrate-pop_0.5s_steps(4,end)_both]",
+        "relative rounded-[4px] border-[3px] bg-[var(--game-bg)] p-4 pr-12 shadow-[0_0_0_3px_var(--game-bg)] motion-safe:animate-[celebrate-pop_0.5s_ease-out_both]",
         leveledUp ? "border-[var(--game-gold)]" : "border-[var(--game-line)]",
       )}
     >

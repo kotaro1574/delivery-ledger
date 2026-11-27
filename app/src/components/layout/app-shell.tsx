@@ -30,7 +30,7 @@ export function AppShell({
       <div className="mx-auto w-full max-w-3xl">
         <header className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <Link className="text-2xl tracking-wider" href="/">
+            <Link className="text-xl tracking-wider sm:text-2xl" href="/">
               はいたつ しゅうし だいちょう
             </Link>
             <div className="mt-1 text-xs tracking-[0.18em] text-[var(--game-sub)]">

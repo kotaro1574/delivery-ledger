@@ -134,7 +134,7 @@ export function DailyTrendCard({
   const segments = buildProfitSegments(trend.points);
 
   return (
-    <GameWindow className="overflow-hidden px-0 pb-0" title="ひごとの しゅうし">
+    <GameWindow className="px-0 pb-0" title="ひごとの しゅうし">
       <div className="flex flex-wrap justify-end gap-3 px-4 pb-2 text-xs text-[var(--game-sub)]">
         <span className="inline-flex items-center gap-1">
           <span className="size-2 bg-[var(--game-income)]" />
