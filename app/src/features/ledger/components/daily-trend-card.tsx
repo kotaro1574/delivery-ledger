@@ -297,7 +297,7 @@ export function DailyTrendCard({
                                 ? "bg-[var(--game-gold)] text-[var(--game-bg)]"
                                 : isActiveDay(point)
                                   ? "text-foreground"
-                                  : "text-[var(--game-sub)]/60",
+                                  : "text-[var(--game-sub)]",
                             )}
                           >
                             {point.day}
