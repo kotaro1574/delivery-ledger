@@ -1,6 +1,20 @@
 import type { Metadata, Viewport } from "next";
+import { DotGothic16, Spline_Sans_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
+
+const dotGothic = DotGothic16({
+  weight: "400",
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-dotgothic",
+});
+
+const splineMono = Spline_Sans_Mono({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-spline-mono",
+});
 
 export const metadata: Metadata = {
   title: {
@@ -11,12 +25,12 @@ export const metadata: Metadata = {
   applicationName: "配達収支台帳",
   appleWebApp: {
     title: "収支台帳",
-    statusBarStyle: "default",
+    statusBarStyle: "black",
   },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#f3efe6",
+  themeColor: "#0b0f2a",
 };
 
 export default function RootLayout({
@@ -25,7 +39,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ja" suppressHydrationWarning>
+    <html
+      className={`${dotGothic.variable} ${splineMono.variable}`}
+      lang="ja"
+      suppressHydrationWarning
+    >
       <body className="antialiased" suppressHydrationWarning>
         {children}
         <Toaster />
