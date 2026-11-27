@@ -235,7 +235,9 @@ export function EntryLedger({
                     {entry.description}
                   </span>
                   <span className="block text-xs tracking-wide text-[var(--game-sub)]">
-                    {entry.category}
+                    {entry.receiptKey
+                      ? `${entry.category} · レシートあり`
+                      : entry.category}
                   </span>
                   {entry.kind === "expense" &&
                   entry.businessAmount !== null &&

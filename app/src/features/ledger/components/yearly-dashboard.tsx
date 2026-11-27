@@ -461,8 +461,9 @@ export function YearlyDashboard({
         <div>
           {summary.byCategory.length > 0 ? (
             summary.byCategory.map((item) => (
-              <div
-                className="grid grid-cols-[6.5rem_1fr_auto] items-center gap-3 border-b-2 border-dashed border-[var(--game-line)]/25 px-4 py-3 last:border-b-0"
+              <Link
+                className="grid grid-cols-[6.5rem_1fr_auto] items-center gap-3 border-b-2 border-dashed border-[var(--game-line)]/25 px-4 py-3 outline-none transition-colors last:border-b-0 hover:bg-[var(--game-panel)] focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--game-gold)]"
+                href={`/year/expenses?year=${year}&category=${item.code}`}
                 key={item.code}
               >
                 <span className="text-sm">{item.name}</span>
@@ -475,7 +476,7 @@ export function YearlyDashboard({
                 <span className="font-mono text-sm font-bold text-[var(--game-expense)]">
                   {yen(item.amount)}
                 </span>
-              </div>
+              </Link>
             ))
           ) : (
             <div className="p-8 text-center text-sm text-[var(--game-sub)]">

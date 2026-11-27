@@ -20,6 +20,18 @@ describe("CommandMenu", () => {
     ).not.toHaveAttribute("aria-current");
   });
 
+  it("下の階層のページでも親の項目を選択中にする", () => {
+    render(<CommandMenu activeHref="/year/expenses" items={items} />);
+
+    expect(screen.getByRole("link", { name: "ねんかん" })).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
+    expect(
+      screen.getByRole("link", { name: "だいちょう" }),
+    ).not.toHaveAttribute("aria-current");
+  });
+
   it("追加の項目をメニューの中に置ける", () => {
     render(
       <CommandMenu activeHref="/" items={items}>

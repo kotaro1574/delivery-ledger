@@ -21,7 +21,9 @@ export function CommandMenu({
       )}
     >
       {items.map((item) => {
-        const active = item.href === activeHref;
+        const active =
+          item.href === activeHref ||
+          (item.href !== "/" && activeHref.startsWith(`${item.href}/`));
 
         return (
           <Link

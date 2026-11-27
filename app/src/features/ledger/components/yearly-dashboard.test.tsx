@@ -55,6 +55,15 @@ const summary = {
 };
 
 describe("YearlyDashboard", () => {
+  it("経費内訳の行はその科目の1年分のページへリンクする", () => {
+    render(<YearlyDashboard summary={summary} year="2026" />);
+
+    expect(screen.getByRole("link", { name: /車両費/ })).toHaveAttribute(
+      "href",
+      "/year/expenses?year=2026&category=601",
+    );
+  });
+
   it("年次の主要数値とグラフを表示する", () => {
     render(<YearlyDashboard summary={summary} year="2026" />);
 
