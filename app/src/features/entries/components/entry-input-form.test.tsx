@@ -30,7 +30,7 @@ describe("EntryInputForm", () => {
 
     render(<EntryInputForm />);
 
-    await userEvent.click(screen.getByLabelText("稼働日"));
+    await userEvent.click(screen.getByLabelText("はたらいた ひ"));
     const dayButton = screen
       .getAllByRole("button")
       .filter(
@@ -41,10 +41,10 @@ describe("EntryInputForm", () => {
     expect(dayButton).toBeDefined();
     await userEvent.click(dayButton as HTMLButtonElement);
 
-    fireEvent.change(screen.getByLabelText(/売上/), {
+    fireEvent.change(screen.getByLabelText(/うりあげ/), {
       target: { value: "8200" },
     });
-    await userEvent.click(screen.getByRole("button", { name: "保存する" }));
+    await userEvent.click(screen.getByRole("button", { name: "セーブする" }));
 
     await waitFor(() => expect(fetchMock).toHaveBeenCalled());
     const entryCall = fetchMock.mock.calls.find(
@@ -57,7 +57,9 @@ describe("EntryInputForm", () => {
       date: "2026-06-04",
       amount: 8200,
     });
-    expect(screen.getByLabelText("稼働日")).toHaveTextContent("2026/06/04");
+    expect(screen.getByLabelText("はたらいた ひ")).toHaveTextContent(
+      "2026/06/04",
+    );
   });
 
   it("未来の日付はカレンダーで選択できない", async () => {
@@ -66,7 +68,7 @@ describe("EntryInputForm", () => {
 
     render(<EntryInputForm />);
 
-    await userEvent.click(screen.getByLabelText("稼働日"));
+    await userEvent.click(screen.getByLabelText("はたらいた ひ"));
     const tomorrowButton = screen
       .getAllByRole("button")
       .find((button) => button.textContent === "16");
@@ -84,7 +86,7 @@ describe("EntryInputForm", () => {
 
     render(<EntryInputForm />);
 
-    fireEvent.change(screen.getByLabelText(/売上/), {
+    fireEvent.change(screen.getByLabelText(/うりあげ/), {
       target: { value: "8200" },
     });
     fireEvent.change(screen.getByLabelText("時間"), {
@@ -93,7 +95,7 @@ describe("EntryInputForm", () => {
     fireEvent.change(screen.getByLabelText("分"), {
       target: { value: "30" },
     });
-    await userEvent.click(screen.getByRole("button", { name: "保存する" }));
+    await userEvent.click(screen.getByRole("button", { name: "セーブする" }));
 
     await waitFor(() => expect(fetchMock).toHaveBeenCalled());
     const entryCall = fetchMock.mock.calls.find(
@@ -113,7 +115,7 @@ describe("EntryInputForm", () => {
   it("件数とオンライン時間の入力枠を同じ高さで表示する", () => {
     render(<EntryInputForm />);
 
-    expect(screen.getByLabelText("件数").parentElement).toHaveClass("h-12");
+    expect(screen.getByLabelText("けんすう").parentElement).toHaveClass("h-12");
     expect(screen.getByLabelText("時間").parentElement).toHaveClass("h-12");
     expect(screen.getByLabelText("分").parentElement).toHaveClass("h-12");
     expect(screen.getByText("時間")).toHaveClass("whitespace-nowrap");
@@ -129,10 +131,10 @@ describe("EntryInputForm", () => {
 
     render(<EntryInputForm />);
 
-    fireEvent.change(screen.getByLabelText(/売上/), {
+    fireEvent.change(screen.getByLabelText(/うりあげ/), {
       target: { value: "8200" },
     });
-    await userEvent.click(screen.getByRole("button", { name: "保存する" }));
+    await userEvent.click(screen.getByRole("button", { name: "セーブする" }));
 
     await waitFor(() =>
       expect(pushMock).toHaveBeenCalledWith(
@@ -150,11 +152,11 @@ describe("EntryInputForm", () => {
 
     render(<EntryInputForm />);
 
-    await userEvent.click(screen.getByRole("button", { name: "経費" }));
-    fireEvent.change(screen.getByLabelText("金額"), {
+    await userEvent.click(screen.getByRole("button", { name: "けいひ" }));
+    fireEvent.change(screen.getByLabelText("きんがく"), {
       target: { value: "2400" },
     });
-    await userEvent.click(screen.getByRole("button", { name: "保存する" }));
+    await userEvent.click(screen.getByRole("button", { name: "セーブする" }));
 
     await waitFor(() => expect(pushMock).toHaveBeenCalledWith("/"));
   });
@@ -194,15 +196,15 @@ describe("EntryInputForm", () => {
 
     render(<EntryInputForm />);
 
-    await userEvent.click(screen.getByRole("button", { name: "経費" }));
+    await userEvent.click(screen.getByRole("button", { name: "けいひ" }));
     await userEvent.click(screen.getByRole("button", { name: "通信費" }));
-    fireEvent.change(screen.getByLabelText("金額"), {
+    fireEvent.change(screen.getByLabelText("きんがく"), {
       target: { value: "3500" },
     });
-    fireEvent.change(screen.getByPlaceholderText("メモ（任意）"), {
+    fireEvent.change(screen.getByPlaceholderText("メモ（なくても OK）"), {
       target: { value: "スマホ代" },
     });
-    await userEvent.click(screen.getByRole("button", { name: "保存する" }));
+    await userEvent.click(screen.getByRole("button", { name: "セーブする" }));
 
     await waitFor(() => expect(fetchMock).toHaveBeenCalled());
     const entryCall = fetchMock.mock.calls.find(
@@ -250,21 +252,23 @@ describe("EntryInputForm", () => {
 
     render(<EntryInputForm />);
 
-    await userEvent.click(screen.getByRole("button", { name: "経費" }));
+    await userEvent.click(screen.getByRole("button", { name: "けいひ" }));
     await userEvent.upload(
       screen.getByLabelText("レシート画像"),
       new File(["receipt"], "receipt.jpg", { type: "image/jpeg" }),
     );
 
     await waitFor(() =>
-      expect(screen.getByLabelText("金額")).toHaveValue("2,350"),
+      expect(screen.getByLabelText("きんがく")).toHaveValue("2,350"),
     );
-    expect(screen.getByLabelText("稼働日")).toHaveTextContent("2026/06/10");
-    expect(screen.getByPlaceholderText("メモ（任意）")).toHaveValue(
+    expect(screen.getByLabelText("はたらいた ひ")).toHaveTextContent(
+      "2026/06/10",
+    );
+    expect(screen.getByPlaceholderText("メモ（なくても OK）")).toHaveValue(
       "ENEOS レギュラーガソリン",
     );
 
-    await userEvent.click(screen.getByRole("button", { name: "保存する" }));
+    await userEvent.click(screen.getByRole("button", { name: "セーブする" }));
 
     const entryCall = fetchMock.mock.calls.find(
       ([url]) => url === "/api/entries",
