@@ -67,7 +67,7 @@ function WorkDetail({
     <dl className="mt-2 grid grid-cols-3 gap-2 border-t border-dashed border-[var(--game-line)]/25 pt-2">
       <div>
         <dt className="text-xs tracking-widest text-[var(--game-sub)]">
-          はたらいた じかん
+          じかん
         </dt>
         <dd className="font-mono text-sm font-bold">
           {work.onlineMinutes > 0 ? workTime(work.onlineMinutes) : "—"}
@@ -85,7 +85,7 @@ function WorkDetail({
       </div>
       <div>
         <dt className="text-xs tracking-widest text-[var(--game-sub)]">
-          はいたつ けんすう
+          けんすう
         </dt>
         <dd className="font-mono text-sm font-bold">{work.deliveries}件</dd>
       </div>
