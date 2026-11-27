@@ -42,7 +42,7 @@ describe("CelebrationBanner", () => {
     );
 
     expect(
-      screen.getByText("スライムは レベル25に あがった！"),
+      screen.getByText("ハネスライムは レベル25に あがった！"),
     ).toBeInTheDocument();
     expect(screen.queryByText(/しんかした！/)).not.toBeInTheDocument();
   });
@@ -58,12 +58,14 @@ describe("CelebrationBanner", () => {
     );
 
     expect(
-      screen.getByText("スライムは レベル21に あがった！"),
+      screen.getByText("ハネスライムは レベル21に あがった！"),
     ).toBeInTheDocument();
-    expect(screen.getByText("エースに しんかした！")).toBeInTheDocument();
+    expect(
+      screen.getByText("ツノスライムは ハネスライムに しんかした！"),
+    ).toBeInTheDocument();
   });
 
-  it("目標に届いたらスライムキング誕生を出す", () => {
+  it("目標に届いたらキングドラゴン誕生を出す", () => {
     render(
       <CelebrationBanner
         gained={20000}
@@ -75,7 +77,7 @@ describe("CelebrationBanner", () => {
 
     expect(
       screen.getByText(
-        "もくひょうたっせい！ スライムキングが たんじょうした！",
+        "もくひょうたっせい！ キングドラゴンが たんじょうした！",
       ),
     ).toBeInTheDocument();
   });

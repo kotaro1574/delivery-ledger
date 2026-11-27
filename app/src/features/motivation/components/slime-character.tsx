@@ -15,13 +15,8 @@ export function SlimeCharacter({
   bounce?: boolean;
   className?: string;
 }) {
-  const grid = level
-    ? composeSlime({ tier: level.tier, step: level.step, gems: level.gems })
-        .grid
-    : composeEgg();
-  const label = level
-    ? `Lv.${level.level} ${level.title}の はいたつスライム`
-    : "スライムのたまご";
+  const grid = level ? composeSlime(level.level).grid : composeEgg();
+  const label = level ? `Lv.${level.level} ${level.title}` : "スライムのたまご";
 
   return (
     <svg
@@ -33,7 +28,7 @@ export function SlimeCharacter({
       )}
       role="img"
       shapeRendering="crispEdges"
-      viewBox="0 0 32 32"
+      viewBox="0 0 48 48"
     >
       {toRuns(grid).map((run) => (
         <rect

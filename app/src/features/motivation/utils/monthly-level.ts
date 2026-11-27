@@ -1,11 +1,11 @@
+import { formNames } from "@/features/motivation/utils/evolution";
+
 export type SlimeTier = 0 | 1 | 2 | 3 | 4;
 
 export type MonthlyLevel = {
   level: number;
   tier: SlimeTier;
   title: string;
-  step: number;
-  gems: number;
   currentLevelStart: number;
   nextLevelAt: number;
   remaining: number;
@@ -14,14 +14,6 @@ export type MonthlyLevel = {
 
 export const LEVELS_TO_GOAL = 40;
 export const KING_LEVEL = LEVELS_TO_GOAL + 1;
-
-export const tierTitles = [
-  "ルーキー",
-  "レギュラー",
-  "エース",
-  "ベテラン",
-  "キング",
-] as const;
 
 function revenueForLevel(level: number, goal: number) {
   return Math.ceil(((level - 1) * goal) / LEVELS_TO_GOAL);
@@ -44,9 +36,7 @@ export function monthlyLevel(
   return {
     level,
     tier,
-    title: tierTitles[tier],
-    step: tier < 4 ? (level - 1) % 10 : 9,
-    gems: tier === 4 ? Math.min(3, Math.floor((level - KING_LEVEL) / 4)) : 0,
+    title: formNames[tier],
     currentLevelStart,
     nextLevelAt,
     remaining: nextLevelAt - earned,
