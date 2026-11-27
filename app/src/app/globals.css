@@ -7,7 +7,7 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-dotgothic), "Hiragino Sans", "Yu Gothic", sans-serif;
   --font-dot: var(--font-dotgothic), "Hiragino Sans", sans-serif;
-  --font-mono: var(--font-spline-mono), "SFMono-Regular", Consolas, monospace;
+  --font-mono: var(--font-spline-mono), var(--font-dotgothic), "SFMono-Regular", monospace;
   --color-ring: var(--ring);
   --color-input: var(--input);
   --color-border: var(--border);

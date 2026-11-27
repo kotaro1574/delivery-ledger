@@ -53,15 +53,21 @@ export function GoalEditor({
       });
 
       if (!response.ok) {
-        throw new Error("目標の保存に失敗した");
+        throw new Error("もくひょうを セーブできなかった…");
       }
 
-      toast.success(targetAmount > 0 ? "目標をセットした" : "目標を外した");
+      toast.success(
+        targetAmount > 0
+          ? "もくひょうを セットした！"
+          : "もくひょうを はずした",
+      );
       setOpen(false);
       router.refresh();
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : "目標の保存に失敗した",
+        error instanceof Error
+          ? error.message
+          : "もくひょうを セーブできなかった…",
       );
     } finally {
       setSaving(false);
@@ -73,33 +79,33 @@ export function GoalEditor({
       <PopoverTrigger asChild>
         {goal ? (
           <button
-            aria-label="目標を編集"
-            className="grid size-8 place-items-center rounded-lg border border-border bg-background transition hover:bg-accent"
+            aria-label="もくひょうを かえる"
+            className="grid size-9 place-items-center rounded-[4px] border-2 border-[var(--game-line)] bg-[var(--game-bg)] transition hover:text-[var(--game-gold)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--game-gold)]"
             type="button"
           >
             <Pencil className="size-4" />
           </button>
         ) : (
           <Button
-            className="h-11 w-full border-2 border-dashed border-[var(--ledger-gold)]/60 bg-[var(--ledger-gold-soft)] font-bold tracking-wider text-[var(--ledger-gold-ink)] hover:bg-[var(--ledger-gold-soft)]/70"
+            className="h-11 w-full tracking-wider"
             type="button"
-            variant="outline"
+            variant="game"
           >
             {emptyLabel}
           </Button>
         )}
       </PopoverTrigger>
-      <PopoverContent align="end" className="w-72 bg-card">
+      <PopoverContent align="end" className="w-72">
         <label
-          className="mb-2 block text-xs tracking-widest text-muted-foreground"
+          className="mb-2 block text-xs tracking-widest text-[var(--game-sub)]"
           htmlFor={`goal-${month}`}
         >
-          目標金額
+          もくひょうきんがく
         </label>
         <div className="flex items-baseline gap-2 border-b-2 border-border px-1 pb-2">
-          <span className="text-xl text-muted-foreground">¥</span>
+          <span className="font-mono text-xl text-[var(--game-sub)]">¥</span>
           <input
-            className="w-full bg-transparent font-mono text-3xl font-bold outline-none placeholder:text-[#cfc7b4]"
+            className="w-full bg-transparent font-mono text-3xl font-bold text-[var(--game-gold)] outline-none placeholder:text-[var(--game-sub)]/50"
             id={`goal-${month}`}
             inputMode="numeric"
             onChange={(event) => setValue(digits(event.target.value))}
@@ -112,17 +118,18 @@ export function GoalEditor({
             value={value ? Number(value).toLocaleString("ja-JP") : ""}
           />
         </div>
-        <div className="mt-2 text-xs text-muted-foreground">
-          空にして保存すると目標を外す
+        <div className="mt-2 text-xs text-[var(--game-sub)]">
+          からっぽで セーブすると もくひょうを はずす
         </div>
         <Button
-          className="mt-4 h-10 w-full font-bold tracking-widest"
+          className="mt-4 h-10 w-full tracking-widest"
           disabled={saving}
           onClick={handleSave}
           type="button"
+          variant="gamePrimary"
         >
           {saving ? <Loader2 className="size-4 animate-spin" /> : null}
-          目標を保存
+          もくひょうを セーブ
         </Button>
       </PopoverContent>
     </Popover>

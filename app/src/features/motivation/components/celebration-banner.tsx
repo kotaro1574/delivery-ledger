@@ -1,6 +1,5 @@
 "use client";
 
-import { Sparkles, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import {
   KING_LEVEL,
@@ -35,62 +34,48 @@ export function CelebrationBanner({
     <section
       aria-live="polite"
       className={cn(
-        "relative overflow-hidden rounded-2xl border-2 p-4 pr-12 motion-safe:animate-[celebrate-pop_0.5s_ease-out_both]",
-        leveledUp
-          ? "border-[var(--ledger-gold)] bg-[var(--ledger-ink)] text-[var(--ledger-card)]"
-          : "border-[var(--ledger-income)]/40 bg-[#eef4ee] text-[var(--ledger-income)]",
+        "relative rounded-[4px] border-[3px] bg-[var(--game-bg)] p-4 pr-12 shadow-[0_0_0_3px_var(--game-bg)] motion-safe:animate-[celebrate-pop_0.5s_steps(4,end)_both]",
+        leveledUp ? "border-[var(--game-gold)]" : "border-[var(--game-line)]",
       )}
     >
-      <div className="flex items-center gap-3">
-        <Sparkles
-          className={cn(
-            "size-6 shrink-0",
-            leveledUp
-              ? "text-[var(--ledger-gold)] motion-safe:animate-pulse"
-              : "text-[var(--ledger-income)]",
-          )}
-        />
-        <div className="min-w-0">
-          <div className="font-mono text-xl font-bold">
-            +{yen(gained)} ゲット！
-          </div>
-          {before && after && leveledUp ? (
-            <div className="mt-1 flex flex-wrap items-baseline gap-x-3 gap-y-1">
-              <span className="font-mono text-sm font-bold tracking-[0.2em] text-[var(--ledger-gold)]">
-                LEVEL UP!
-              </span>
-              <span className="font-mono text-sm font-bold">
-                Lv.{before.level} → Lv.{after.level}
-              </span>
-              {becameKing ? (
-                <span className="rounded-full bg-[var(--ledger-gold)] px-2 py-0.5 text-xs font-bold text-[var(--ledger-ink)]">
-                  目標達成！スライムキング誕生！
-                </span>
-              ) : null}
-              {evolved ? (
-                <span className="rounded-full bg-[var(--ledger-gold)] px-2 py-0.5 text-xs font-bold text-[var(--ledger-ink)]">
-                  {after.title}に進化！
-                </span>
-              ) : null}
-            </div>
-          ) : null}
-          {after && !leveledUp ? (
-            <div className="mt-0.5 text-xs font-bold opacity-80">
-              次のLvまで あと {yen(after.remaining)}
-            </div>
-          ) : null}
+      <div className="space-y-1 leading-relaxed">
+        <div className="font-mono text-xl text-[var(--game-income)]">
+          +{yen(gained)} ゲット！
         </div>
+        {after && leveledUp ? (
+          <div className="text-[var(--game-gold)]">
+            スライムは レベル{after.level}に あがった！
+          </div>
+        ) : null}
+        {becameKing ? (
+          <div className="text-[var(--game-gold)]">
+            もくひょうたっせい！ スライムキングが たんじょうした！
+          </div>
+        ) : null}
+        {after && evolved ? (
+          <div className="text-[var(--game-gold)]">
+            {after.title}に しんかした！
+          </div>
+        ) : null}
+        {after && !leveledUp ? (
+          <div className="font-mono text-sm text-[var(--game-sub)]">
+            つぎのレベルまで あと {yen(after.remaining)}
+          </div>
+        ) : null}
       </div>
+      <span
+        aria-hidden="true"
+        className="absolute right-4 bottom-2 text-xs text-[var(--game-line)] motion-safe:animate-[cursor-blink_1s_steps(2,jump-none)_infinite]"
+      >
+        ▼
+      </span>
       <button
-        aria-label="閉じる"
-        className={cn(
-          "absolute top-3 right-3 grid size-8 place-items-center rounded-lg transition",
-          leveledUp ? "hover:bg-white/10" : "hover:bg-black/5",
-        )}
+        aria-label="とじる"
+        className="absolute top-2 right-2 grid size-9 place-items-center rounded-[2px] text-[var(--game-line)] hover:text-[var(--game-gold)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--game-gold)]"
         onClick={() => router.replace(`/?month=${month}`, { scroll: false })}
         type="button"
       >
-        <X className="size-4" />
+        ×
       </button>
     </section>
   );

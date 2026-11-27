@@ -1,5 +1,6 @@
 import { Crown } from "lucide-react";
 import type { CSSProperties } from "react";
+import { GameWindow } from "@/components/game/game-window";
 import { GoalEditor } from "@/features/motivation/components/goal-editor";
 import { SlimeCharacter } from "@/features/motivation/components/slime-character";
 import {
@@ -38,9 +39,9 @@ export function StatusPanel({
   const monthNumber = Number(month.slice(5));
 
   return (
-    <section className="overflow-hidden rounded-2xl border border-[var(--ledger-gold)]/35 bg-card shadow-[0_1px_0_rgb(0_0_0_/_4%),0_12px_32px_-18px_rgb(192_138_46_/_45%)]">
-      <div className="flex items-center gap-4 p-5">
-        <div className="grid size-24 shrink-0 place-items-center rounded-2xl border border-[var(--ledger-gold)]/40 bg-[var(--ledger-gold-soft)] sm:size-28">
+    <GameWindow className="p-0 pt-0 pb-0" title="ステータス">
+      <div className="flex items-center gap-4 px-4 pt-5 pb-4">
+        <div className="grid size-24 shrink-0 place-items-center rounded-[4px] border-2 border-[var(--game-line)]/40 bg-[var(--game-panel)] sm:size-28">
           <SlimeCharacter
             bounce={celebrating}
             className="size-[88%]"
@@ -51,15 +52,15 @@ export function StatusPanel({
           {level && progress ? (
             <>
               <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
-                <span className="font-mono text-3xl font-bold leading-none">
+                <span className="text-3xl leading-none text-[var(--game-gold)]">
                   Lv.{level.level}
                 </span>
                 <span
                   className={cn(
-                    "rounded-full px-2.5 py-0.5 text-xs font-bold tracking-widest",
+                    "rounded-[2px] border-2 px-2 py-0.5 text-xs tracking-widest",
                     level.tier === 4
-                      ? "bg-[var(--ledger-gold)] text-[var(--ledger-ink)]"
-                      : "bg-[var(--ledger-ink)] text-[var(--ledger-card)]",
+                      ? "border-[var(--game-gold)] bg-[var(--game-gold)] text-[var(--game-bg)]"
+                      : "border-[var(--game-line)] text-[var(--game-line)]",
                   )}
                 >
                   {level.title}
@@ -74,33 +75,34 @@ export function StatusPanel({
                 }
                 progress={progress}
               />
-              <div className="mt-1.5 flex flex-wrap items-center justify-between gap-x-2 whitespace-nowrap font-mono text-xs font-bold">
-                <span className="text-[var(--ledger-income)]">
-                  {yen(revenue)} 稼いだ
+              <div className="mt-1.5 flex flex-wrap items-center justify-between gap-x-2 whitespace-nowrap text-xs">
+                <span className="font-mono text-[var(--game-income)]">
+                  かせいだ {yen(revenue)}
                 </span>
-                <span className="text-[var(--ledger-gold-ink)]">
-                  次のLvまで {yen(level.remaining)}
+                <span className="font-mono text-[var(--game-gold)]">
+                  つぎのレベルまで {yen(level.remaining)}
                 </span>
               </div>
             </>
           ) : (
             <>
-              <div className="text-sm font-bold">
-                目標を決めるとスライムが生まれる
+              <div className="text-sm">
+                もくひょうを きめると スライムが うまれる
               </div>
-              <div className="mt-1 text-xs text-muted-foreground">
-                目標の2.5%を稼ぐごとに1レベル。100%でスライムキング
+              <div className="mt-1 text-xs text-[var(--game-sub)]">
+                もくひょうの 2.5% を かせぐごとに 1レベル。100% で
+                スライムキング
               </div>
             </>
           )}
         </div>
       </div>
-      <div className="flex items-center justify-between gap-3 border-t border-dashed border-[var(--ledger-gold)]/35 bg-[#fffdf7] px-5 py-3">
+      <div className="flex items-center justify-between gap-3 border-t-2 border-dashed border-[var(--game-line)]/40 px-4 py-3">
         {progress ? (
           <>
             <div className="min-w-0">
-              <div className="text-xs tracking-widest text-muted-foreground">
-                {monthNumber}月の目標 {yen(progress.goal)}
+              <div className="font-mono text-xs tracking-widest text-[var(--game-sub)]">
+                {monthNumber}月の もくひょう {yen(progress.goal)}
               </div>
               <GoalStatus progress={progress} />
             </div>
@@ -114,8 +116,8 @@ export function StatusPanel({
             <GoalEditor
               emptyLabel={
                 goalTiming(month, today) === "current"
-                  ? "今月の目標を決めよう"
-                  : `${monthNumber}月の目標を決める`
+                  ? "こんげつの もくひょうを きめよう"
+                  : `${monthNumber}月の もくひょうを きめる`
               }
               goal={null}
               month={month}
@@ -128,7 +130,7 @@ export function StatusPanel({
           </div>
         )}
       </div>
-    </section>
+    </GameWindow>
   );
 }
 
@@ -150,29 +152,30 @@ function AchievementBar({
 
   return (
     <div className="mt-3 flex items-center gap-2">
+      <span className="text-xs text-[var(--game-sub)]">EXP</span>
       <div
         aria-label={`今月の目標達成率${Math.floor(progress.rate * 100)}%`}
         aria-valuemax={100}
         aria-valuemin={0}
         aria-valuenow={Math.floor(progress.rate * 100)}
-        className="relative h-3 flex-1 overflow-hidden rounded-full bg-[var(--ledger-gold-soft)] ring-1 ring-[var(--ledger-gold)]/30"
+        className="relative h-3.5 flex-1 overflow-hidden border-2 border-[var(--game-line)] bg-[var(--game-panel)]"
         role="progressbar"
       >
         <div
           className={cn(
-            "h-full rounded-full",
+            "h-full",
             progress.achieved
-              ? "bg-[var(--ledger-income)]"
-              : "bg-[var(--ledger-gold)]",
+              ? "bg-[var(--game-income)]"
+              : "bg-[var(--game-gold)]",
             celebrating &&
-              "motion-safe:animate-[xp-fill_1.4s_cubic-bezier(0.2,0.8,0.2,1)_0.3s_both]",
+              "motion-safe:animate-[xp-fill_1.4s_steps(12,end)_0.3s_both]",
           )}
           style={style}
         />
         <div className="pointer-events-none absolute inset-0 grid grid-cols-4">
-          <span className="border-r border-white/70" />
-          <span className="border-r border-white/70" />
-          <span className="border-r border-white/70" />
+          <span className="border-r-2 border-[var(--game-bg)]/60" />
+          <span className="border-r-2 border-[var(--game-bg)]/60" />
+          <span className="border-r-2 border-[var(--game-bg)]/60" />
           <span />
         </div>
       </div>
@@ -185,9 +188,9 @@ function AchievementBar({
 
 function KingBadge({ count }: { count: number }) {
   return (
-    <span className="inline-flex items-center gap-1 rounded-full bg-[var(--ledger-gold-soft)] px-2.5 py-1 text-xs font-bold text-[var(--ledger-gold-ink)] ring-1 ring-[var(--ledger-gold)]/40">
+    <span className="inline-flex items-center gap-1 rounded-[2px] border-2 border-[var(--game-gold)] px-2 py-1 text-xs text-[var(--game-gold)]">
       <Crown className="size-3.5" />
-      キング達成 {count}回
+      キング {count}回
     </span>
   );
 }
@@ -195,8 +198,8 @@ function KingBadge({ count }: { count: number }) {
 function GoalStatus({ progress }: { progress: GoalProgress }) {
   if (progress.achieved) {
     return (
-      <div className="mt-0.5 flex flex-wrap items-center gap-x-2 text-sm font-bold text-[var(--ledger-income)]">
-        <span>目標達成！</span>
+      <div className="mt-0.5 flex flex-wrap items-center gap-x-2 text-sm text-[var(--game-income)]">
+        <span>もくひょう たっせい！</span>
         {progress.overAmount > 0 ? (
           <span className="font-mono text-xs">
             +{yen(progress.overAmount)} オーバー
@@ -208,20 +211,20 @@ function GoalStatus({ progress }: { progress: GoalProgress }) {
 
   if (progress.timing === "past") {
     return (
-      <div className="mt-0.5 text-xs font-bold text-muted-foreground">
-        未達 あと {yen(progress.remaining)} だった
+      <div className="mt-0.5 font-mono text-xs text-[var(--game-sub)]">
+        あと {yen(progress.remaining)} たりなかった
       </div>
     );
   }
 
   return (
-    <div className="mt-0.5 flex flex-wrap gap-x-3 text-xs font-bold">
-      <span className="text-muted-foreground">
+    <div className="mt-0.5 flex flex-wrap gap-x-3 font-mono text-xs">
+      <span className="text-[var(--game-sub)]">
         あと {yen(progress.remaining)}
       </span>
       {progress.dailyPace !== null ? (
-        <span className="text-[var(--ledger-gold-ink)]">
-          1日 {yen(progress.dailyPace)} ペース
+        <span className="text-[var(--game-gold)]">
+          1にち {yen(progress.dailyPace)} ペース
         </span>
       ) : null}
     </div>

@@ -25,8 +25,10 @@ describe("CelebrationBanner", () => {
     );
 
     expect(screen.getByText("+¥1,000 ゲット！")).toBeInTheDocument();
-    expect(screen.queryByText("LEVEL UP!")).not.toBeInTheDocument();
-    expect(screen.getByText("次のLvまで あと ¥1,500")).toBeInTheDocument();
+    expect(screen.queryByText(/あがった！/)).not.toBeInTheDocument();
+    expect(
+      screen.getByText("つぎのレベルまで あと ¥1,500"),
+    ).toBeInTheDocument();
   });
 
   it("レベルが上がったらLEVEL UPを出す", () => {
@@ -39,9 +41,10 @@ describe("CelebrationBanner", () => {
       />,
     );
 
-    expect(screen.getByText("LEVEL UP!")).toBeInTheDocument();
-    expect(screen.getByText("Lv.24 → Lv.25")).toBeInTheDocument();
-    expect(screen.queryByText(/進化！/)).not.toBeInTheDocument();
+    expect(
+      screen.getByText("スライムは レベル25に あがった！"),
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/しんかした！/)).not.toBeInTheDocument();
   });
 
   it("段階が変わったら進化を出す", () => {
@@ -54,8 +57,10 @@ describe("CelebrationBanner", () => {
       />,
     );
 
-    expect(screen.getByText("Lv.19 → Lv.21")).toBeInTheDocument();
-    expect(screen.getByText("エースに進化！")).toBeInTheDocument();
+    expect(
+      screen.getByText("スライムは レベル21に あがった！"),
+    ).toBeInTheDocument();
+    expect(screen.getByText("エースに しんかした！")).toBeInTheDocument();
   });
 
   it("目標に届いたらスライムキング誕生を出す", () => {
@@ -69,7 +74,9 @@ describe("CelebrationBanner", () => {
     );
 
     expect(
-      screen.getByText("目標達成！スライムキング誕生！"),
+      screen.getByText(
+        "もくひょうたっせい！ スライムキングが たんじょうした！",
+      ),
     ).toBeInTheDocument();
   });
 
@@ -84,7 +91,7 @@ describe("CelebrationBanner", () => {
     );
 
     expect(screen.getByText("+¥12,000 ゲット！")).toBeInTheDocument();
-    expect(screen.queryByText("LEVEL UP!")).not.toBeInTheDocument();
+    expect(screen.queryByText(/あがった！/)).not.toBeInTheDocument();
   });
 
   it("閉じると表示中の月のURLに戻す", async () => {
@@ -97,7 +104,7 @@ describe("CelebrationBanner", () => {
       />,
     );
 
-    await userEvent.click(screen.getByRole("button", { name: "閉じる" }));
+    await userEvent.click(screen.getByRole("button", { name: "とじる" }));
 
     expect(replace).toHaveBeenCalledWith("/?month=2026-11", { scroll: false });
   });
