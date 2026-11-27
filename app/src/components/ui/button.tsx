@@ -5,7 +5,7 @@ import type * as React from "react";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-normal transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring focus-visible:ring-2 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
   {
     variants: {
       variant: {
@@ -19,6 +19,9 @@ const buttonVariants = cva(
         ghost:
           "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
         link: "text-primary underline-offset-4 hover:underline",
+        game: "rounded-[4px] border-2 border-[var(--game-line)] bg-[var(--game-bg)] text-[var(--game-line)] before:hidden before:text-xs before:content-['▶'] hover:text-[var(--game-gold)] hover:before:inline focus-visible:text-[var(--game-gold)] focus-visible:before:inline",
+        gamePrimary:
+          "rounded-[4px] border-2 border-[var(--game-line)] bg-[var(--game-gold)] text-[var(--game-bg)] shadow-[0_3px_0_var(--game-line)] hover:brightness-110 active:translate-y-[2px] active:shadow-none",
       },
       size: {
         default: "h-9 px-4 py-2 has-[>svg]:px-3",
