@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { formName } from "@/features/motivation/utils/evolution";
 import {
   KING_LEVEL,
   monthlyLevel,
@@ -44,17 +45,17 @@ export function CelebrationBanner({
         </div>
         {after && leveledUp ? (
           <div className="text-[var(--game-gold)]">
-            スライムは レベル{after.level}に あがった！
+            {after.title}は レベル{after.level}に あがった！
           </div>
         ) : null}
         {becameKing ? (
           <div className="text-[var(--game-gold)]">
-            もくひょうたっせい！ スライムキングが たんじょうした！
+            もくひょうたっせい！ {formName(KING_LEVEL)}が たんじょうした！
           </div>
         ) : null}
-        {after && evolved ? (
+        {before && after && evolved ? (
           <div className="text-[var(--game-gold)]">
-            {after.title}に しんかした！
+            {before.title}は {after.title}に しんかした！
           </div>
         ) : null}
         {after && !leveledUp ? (

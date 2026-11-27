@@ -3,12 +3,16 @@ import type { CSSProperties } from "react";
 import { GameWindow } from "@/components/game/game-window";
 import { GoalEditor } from "@/features/motivation/components/goal-editor";
 import { SlimeCharacter } from "@/features/motivation/components/slime-character";
+import { formName } from "@/features/motivation/utils/evolution";
 import {
   type GoalProgress,
   goalProgress,
   goalTiming,
 } from "@/features/motivation/utils/goal-progress";
-import { monthlyLevel } from "@/features/motivation/utils/monthly-level";
+import {
+  KING_LEVEL,
+  monthlyLevel,
+} from "@/features/motivation/utils/monthly-level";
 import { yen } from "@/features/motivation/utils/yen";
 import { cn } from "@/lib/utils";
 
@@ -90,8 +94,7 @@ export function StatusPanel({
                 もくひょうを きめると スライムが うまれる
               </div>
               <div className="mt-1 text-xs text-[var(--game-sub)]">
-                もくひょうの 2.5% を かせぐごとに 1レベル。100% で
-                スライムキング
+                {`もくひょうの 2.5% を かせぐごとに 1レベル。100% で ${formName(KING_LEVEL)}`}
               </div>
             </>
           )}

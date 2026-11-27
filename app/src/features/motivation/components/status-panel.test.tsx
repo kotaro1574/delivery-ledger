@@ -29,10 +29,10 @@ describe("StatusPanel", () => {
     );
 
     expect(screen.getByText("Lv.25")).toBeInTheDocument();
-    expect(screen.getByText("エース")).toBeInTheDocument();
+    expect(screen.getByText("ハネスライム")).toBeInTheDocument();
     expect(screen.getByText("つぎのレベルまで ¥1,500")).toBeInTheDocument();
     expect(
-      screen.getByRole("img", { name: "Lv.25 エースの はいたつスライム" }),
+      screen.getByRole("img", { name: "Lv.25 ハネスライム" }),
     ).toBeInTheDocument();
   });
 
@@ -52,6 +52,11 @@ describe("StatusPanel", () => {
     ).toBeInTheDocument();
     expect(
       screen.getByText("もくひょうを きめると スライムが うまれる"),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "もくひょうの 2.5% を かせぐごとに 1レベル。100% で キングドラゴン",
+      ),
     ).toBeInTheDocument();
   });
 
@@ -80,7 +85,7 @@ describe("StatusPanel", () => {
       />,
     );
 
-    expect(screen.getByText("キング")).toBeInTheDocument();
+    expect(screen.getByText("キングドラゴン")).toBeInTheDocument();
     expect(screen.getByText("もくひょう たっせい！")).toBeInTheDocument();
   });
 
