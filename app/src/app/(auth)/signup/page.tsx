@@ -45,29 +45,29 @@ export default function SignupPage() {
       });
 
       if (result.error) {
-        setError(result.error.message ?? "アカウント作成に失敗した");
+        setError(result.error.message ?? "アカウントを つくれなかった…");
         setLoading(false);
         return;
       }
 
       window.location.href = "/";
     } catch {
-      setError("アカウント作成に失敗した");
+      setError("アカウントを つくれなかった…");
       setLoading(false);
     }
   };
 
   return (
-    <Card className="border-[var(--ledger-line)] bg-[var(--ledger-card)]">
+    <Card>
       <CardHeader>
-        <CardTitle>アカウント作成</CardTitle>
-        <CardDescription>ひとり用の台帳を作る</CardDescription>
+        <CardTitle>あたらしく はじめる</CardTitle>
+        <CardDescription>じぶん だけの だいちょうを つくる</CardDescription>
       </CardHeader>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(handleSubmit)}>
           <CardContent className="space-y-4">
             {error ? (
-              <div className="rounded-md bg-red-50 p-3 text-sm text-red-700">
+              <div className="rounded-[4px] border-2 border-[var(--game-expense)] p-3 text-sm text-[var(--game-expense)]">
                 {error}
               </div>
             ) : null}
@@ -76,7 +76,7 @@ export default function SignupPage() {
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>名前</FormLabel>
+                  <FormLabel>なまえ</FormLabel>
                   <FormControl>
                     <Input autoComplete="name" {...field} />
                   </FormControl>
@@ -116,11 +116,19 @@ export default function SignupPage() {
             />
           </CardContent>
           <CardFooter className="flex-col gap-3 pt-6">
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "作成中..." : "作成する"}
+            <Button
+              className="h-11 w-full tracking-widest"
+              disabled={loading}
+              type="submit"
+              variant="gamePrimary"
+            >
+              {loading ? "つくってる…" : "つくる"}
             </Button>
-            <Link className="text-sm text-muted-foreground" href="/login">
-              ログインへ戻る
+            <Link
+              className="inline-flex h-9 items-center text-sm text-[var(--game-sub)] hover:text-[var(--game-gold)]"
+              href="/login"
+            >
+              ログインへ もどる
             </Link>
           </CardFooter>
         </form>
