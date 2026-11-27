@@ -7,9 +7,5 @@ export const size = {
 export const contentType = "image/png";
 
 export default function Icon() {
-  return renderAppIcon({
-    size: size.width,
-    glyphRatio: 23 / 32,
-    cornerRatio: 7 / 32,
-  });
+  return renderAppIcon({ size: size.width, framed: true });
 }

@@ -1,4 +1,5 @@
 import { evolutionFeatures } from "@/features/motivation/utils/evolution";
+import { KING_LEVEL } from "@/features/motivation/utils/monthly-level";
 import {
   createGrid,
   drawPart,
@@ -44,6 +45,19 @@ export function composeSlime(level: number) {
   ];
 
   return { grid, parts, face };
+}
+
+const ICON_SIZE = 28;
+const ICON_ORIGIN = { x: 17, y: 1 };
+
+export function composeAppIcon(): PixelGrid {
+  const grid = createGrid();
+  drawDragonForm(grid, evolutionFeatures(KING_LEVEL), bodyPalette(KING_LEVEL), {
+    scene: false,
+  });
+  return grid
+    .slice(ICON_ORIGIN.y, ICON_ORIGIN.y + ICON_SIZE)
+    .map((row) => row.slice(ICON_ORIGIN.x, ICON_ORIGIN.x + ICON_SIZE));
 }
 
 export function composeEgg() {

@@ -1,9 +1,9 @@
 import { renderAppIcon } from "@/lib/app-icon";
 
 const PWA_ICONS = {
-  "icon-192.png": { size: 192, glyphRatio: 0.66, cornerRatio: 0.22 },
-  "icon-512.png": { size: 512, glyphRatio: 0.66, cornerRatio: 0.22 },
-  "maskable-512.png": { size: 512, glyphRatio: 0.5, cornerRatio: 0 },
+  "icon-192.png": { size: 192, framed: true },
+  "icon-512.png": { size: 512, framed: true },
+  "maskable-512.png": { size: 512, framed: false },
 } as const;
 
 type PwaIconName = keyof typeof PWA_ICONS;
