@@ -4,6 +4,7 @@ export const INK = "#120e26";
 export type PixelGrid = (string | null)[][];
 export type Put = (x: number, y: number, color: string) => void;
 export type Point = [number, number];
+export type FacePixel = { x: number; y: number; color: string };
 
 const NEIGHBORS: readonly Point[] = [
   [0, 1],
@@ -55,6 +56,22 @@ export function drawPart(
       if (color) grid[y][x] = color;
     }
   }
+}
+
+export function drawFace(grid: PixelGrid, draw: (put: Put) => void) {
+  const face = new Map<string, FacePixel>();
+  drawPart(
+    grid,
+    (put) =>
+      draw((x, y, color) => {
+        const px = Math.round(x);
+        const py = Math.round(y);
+        if (inside(px, py)) face.set(`${px},${py}`, { x: px, y: py, color });
+        put(px, py, color);
+      }),
+    { outline: false },
+  );
+  return [...face.values()];
 }
 
 export function fillEllipse(
