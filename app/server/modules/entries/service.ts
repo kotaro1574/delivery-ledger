@@ -8,7 +8,7 @@ import {
 } from "@server/db/schema";
 import { AccountCode, defaultCategoryRatios } from "@server/lib/accounts";
 import { BadRequestError, NotFoundError } from "@server/lib/errors";
-import { and, eq, inArray, like } from "drizzle-orm";
+import { and, eq, inArray, like, type SQL } from "drizzle-orm";
 import type { BatchItem } from "drizzle-orm/batch";
 import { buildJournal } from "./journal";
 import type { EntriesModel } from "./model";
@@ -140,6 +140,65 @@ async function expenseBreakdowns(entryIds: string[]) {
   }, new Map<string, { businessAmount: number; privateAmount: number }>());
 }
 
+async function listItems(
+  userId: string,
+  filter: SQL | undefined,
+): Promise<EntriesModel.Item[]> {
+  const db = await getDB();
+  const rows = await db
+    .select({
+      id: journalEntries.id,
+      date: journalEntries.entryDate,
+      kind: entryDetails.kind,
+      category: accounts.name,
+      categoryCode: entryDetails.categoryCode,
+      description: journalEntries.description,
+      amount: entryDetails.amount,
+      deliveries: entryDetails.deliveries,
+      onlineMinutes: entryDetails.onlineMinutes,
+      receiptKey: entryDetails.receiptKey,
+    })
+    .from(journalEntries)
+    .innerJoin(entryDetails, eq(entryDetails.entryId, journalEntries.id))
+    .innerJoin(accounts, eq(accounts.code, entryDetails.categoryCode))
+    .where(and(eq(journalEntries.userId, userId), filter));
+
+  const breakdowns = await expenseBreakdowns(
+    rows.filter((row) => row.kind === "expense").map((row) => row.id),
+  );
+
+  const items: EntriesModel.Item[] = rows
+    .map((row) => ({
+      id: row.id,
+      date: row.date,
+      kind: row.kind,
+      category: row.category,
+      categoryCode: row.categoryCode,
+      description: row.description ?? row.category,
+      amount: row.amount,
+      deliveries: row.deliveries,
+      onlineMinutes: row.onlineMinutes,
+      receiptKey: row.receiptKey,
+      businessAmount:
+        row.kind === "expense"
+          ? (breakdowns.get(row.id)?.businessAmount ?? row.amount)
+          : null,
+      privateAmount:
+        row.kind === "expense"
+          ? (breakdowns.get(row.id)?.privateAmount ?? 0)
+          : null,
+    }))
+    .sort((a, b) => {
+      const dateOrder = b.date.localeCompare(a.date);
+      if (dateOrder !== 0) {
+        return dateOrder;
+      }
+      return a.kind.localeCompare(b.kind);
+    });
+
+  return items;
+}
+
 export const EntriesService = {
   async create(
     userId: string,
@@ -170,66 +229,29 @@ export const EntriesService = {
     userId: string,
     month: string,
   ): Promise<EntriesModel.ListResponse> {
-    const db = await getDB();
-    const monthLike = `${month}-%`;
+    return {
+      items: await listItems(
+        userId,
+        like(journalEntries.entryDate, `${month}-%`),
+      ),
+    };
+  },
 
-    const rows = await db
-      .select({
-        id: journalEntries.id,
-        date: journalEntries.entryDate,
-        kind: entryDetails.kind,
-        category: accounts.name,
-        categoryCode: entryDetails.categoryCode,
-        description: journalEntries.description,
-        amount: entryDetails.amount,
-        deliveries: entryDetails.deliveries,
-        onlineMinutes: entryDetails.onlineMinutes,
-        receiptKey: entryDetails.receiptKey,
-      })
-      .from(journalEntries)
-      .innerJoin(entryDetails, eq(entryDetails.entryId, journalEntries.id))
-      .innerJoin(accounts, eq(accounts.code, entryDetails.categoryCode))
-      .where(
+  async listExpenses(
+    userId: string,
+    year: string,
+    categoryCode: string,
+  ): Promise<EntriesModel.ListResponse> {
+    return {
+      items: await listItems(
+        userId,
         and(
-          eq(journalEntries.userId, userId),
-          like(journalEntries.entryDate, monthLike),
+          like(journalEntries.entryDate, `${year}-%`),
+          eq(entryDetails.kind, "expense"),
+          eq(entryDetails.categoryCode, categoryCode),
         ),
-      );
-
-    const breakdowns = await expenseBreakdowns(
-      rows.filter((row) => row.kind === "expense").map((row) => row.id),
-    );
-
-    const items: EntriesModel.Item[] = rows
-      .map((row) => ({
-        id: row.id,
-        date: row.date,
-        kind: row.kind,
-        category: row.category,
-        categoryCode: row.categoryCode,
-        description: row.description ?? row.category,
-        amount: row.amount,
-        deliveries: row.deliveries,
-        onlineMinutes: row.onlineMinutes,
-        receiptKey: row.receiptKey,
-        businessAmount:
-          row.kind === "expense"
-            ? (breakdowns.get(row.id)?.businessAmount ?? row.amount)
-            : null,
-        privateAmount:
-          row.kind === "expense"
-            ? (breakdowns.get(row.id)?.privateAmount ?? 0)
-            : null,
-      }))
-      .sort((a, b) => {
-        const dateOrder = b.date.localeCompare(a.date);
-        if (dateOrder !== 0) {
-          return dateOrder;
-        }
-        return a.kind.localeCompare(b.kind);
-      });
-
-    return { items };
+      ),
+    };
   },
 
   async update(
