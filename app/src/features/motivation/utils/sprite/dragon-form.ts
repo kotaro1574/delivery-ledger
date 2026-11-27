@@ -79,6 +79,7 @@ export function drawDragonForm(
   grid: PixelGrid,
   features: EvolutionFeatures,
   palette: BodyPalette,
+  { scene = true }: { scene?: boolean } = {},
 ): FacePixel[] {
   const shape = shapeFor(features);
   const s = shape.scale;
@@ -99,9 +100,11 @@ export function drawDragonForm(
     fillEllipse(put, cx, cy, rx * s, ry * s, (nx, ny) => tone(nx, ny));
   };
 
-  if (features.king) drawRays(grid);
-  speedLines(grid, 22);
-  groundShadow(grid, 24, features.king ? 11 : 9);
+  if (scene) {
+    if (features.king) drawRays(grid);
+    speedLines(grid, 22);
+    groundShadow(grid, 24, features.king ? 11 : 9);
+  }
 
   const wingSize = wingScale(features.wingSize);
   const wingPoints = WING.map(

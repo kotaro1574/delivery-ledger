@@ -325,7 +325,11 @@ export function LedgerDashboard({
         </div>
       </GameWindow>
 
-      <DailyTrendCard entries={entries} month={month} />
+      <DailyTrendCard
+        entries={entries}
+        month={month}
+        stats={summary.dailyStats}
+      />
 
       <GameWindow className="px-0 pb-1" title="経費内訳（事業分）">
         <div>

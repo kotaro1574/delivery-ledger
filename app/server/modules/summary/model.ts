@@ -21,6 +21,13 @@ export namespace SummaryModel {
   });
   export type Category = z.infer<typeof Category>;
 
+  export const DailyStat = z.object({
+    date: z.string(),
+    deliveries: z.number(),
+    onlineMinutes: z.number(),
+  });
+  export type DailyStat = z.infer<typeof DailyStat>;
+
   export const Response = z.object({
     revenue: z.number(),
     expense: z.number(),
@@ -36,6 +43,7 @@ export namespace SummaryModel {
       onlineHours: z.number(),
       workDays: z.number(),
     }),
+    dailyStats: z.array(DailyStat),
   });
   export type Response = z.infer<typeof Response>;
 

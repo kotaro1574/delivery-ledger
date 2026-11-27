@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  composeAppIcon,
   composeEgg,
   composeSlime,
   type PixelGrid,
@@ -100,5 +101,18 @@ describe("toRuns", () => {
       { x: 0, y: 0, width: 2, color: "#000" },
       { x: 1, y: 1, width: 2, color: "#fff" },
     ]);
+  });
+});
+
+describe("composeAppIcon", () => {
+  it("28x28でキングドラゴンの王冠を描き背景の光やスピード線を入れない", () => {
+    const icon = composeAppIcon();
+    expect(icon).toHaveLength(28);
+    expect(icon.every((row) => row.length === 28)).toBe(true);
+    const colors = new Set(icon.flat());
+    expect(colors.has("#ffd84a")).toBe(true);
+    expect(colors.has("#2a3478")).toBe(false);
+    expect(colors.has("#1f2860")).toBe(false);
+    expect(colors.has("#7f88b8")).toBe(false);
   });
 });

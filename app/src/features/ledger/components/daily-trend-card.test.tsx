@@ -48,9 +48,31 @@ const entries: EntriesModel.Item[] = [
   },
 ];
 
+const stats = [{ date: "2026-06-12", deliveries: 5, onlineMinutes: 150 }];
+
 describe("DailyTrendCard", () => {
+  it("選んだ日のはたらいた時間・時給・配達件数を表示する", () => {
+    render(<DailyTrendCard entries={entries} month="2026-06" stats={stats} />);
+
+    const detail = screen.getByTestId("daily-trend-detail");
+    expect(within(detail).getByText("2時間30分")).toBeInTheDocument();
+    expect(within(detail).getByText("¥1,360")).toBeInTheDocument();
+    expect(within(detail).getByText("5件")).toBeInTheDocument();
+  });
+
+  it("はたらいた記録がない日は時間・時給・件数を出さない", async () => {
+    render(<DailyTrendCard entries={entries} month="2026-06" stats={stats} />);
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "6/9(火)の収支詳細" }),
+    );
+
+    const detail = screen.getByTestId("daily-trend-detail");
+    expect(within(detail).queryByText("じきゅう")).not.toBeInTheDocument();
+  });
+
   it("最後の稼働日の内訳を最初から表示する", () => {
-    render(<DailyTrendCard entries={entries} month="2026-06" />);
+    render(<DailyTrendCard entries={entries} month="2026-06" stats={stats} />);
 
     const detail = screen.getByTestId("daily-trend-detail");
     expect(within(detail).getByText("6/12")).toBeInTheDocument();
@@ -62,7 +84,7 @@ describe("DailyTrendCard", () => {
   });
 
   it("日付をタップするとその日の売上・事業経費・利益を表示する", async () => {
-    render(<DailyTrendCard entries={entries} month="2026-06" />);
+    render(<DailyTrendCard entries={entries} month="2026-06" stats={stats} />);
 
     await userEvent.click(
       screen.getByRole("button", { name: "6/9(火)の収支詳細" }),
@@ -77,7 +99,7 @@ describe("DailyTrendCard", () => {
   });
 
   it("稼働していない日をタップすると記録なしと表示する", async () => {
-    render(<DailyTrendCard entries={entries} month="2026-06" />);
+    render(<DailyTrendCard entries={entries} month="2026-06" stats={stats} />);
 
     await userEvent.click(
       screen.getByRole("button", { name: "6/10(水)の収支詳細" }),
@@ -91,7 +113,7 @@ describe("DailyTrendCard", () => {
   });
 
   it("全日分の日付と曜日を2段で並べ、横スクロールできる", () => {
-    render(<DailyTrendCard entries={entries} month="2026-06" />);
+    render(<DailyTrendCard entries={entries} month="2026-06" stats={stats} />);
 
     const chart = screen.getByTestId("daily-trend-chart-area");
     const days = within(chart).getAllByRole("button");
@@ -107,14 +129,14 @@ describe("DailyTrendCard", () => {
   });
 
   it("金額の目盛りを表示する", () => {
-    render(<DailyTrendCard entries={entries} month="2026-06" />);
+    render(<DailyTrendCard entries={entries} month="2026-06" stats={stats} />);
 
     expect(screen.getByText("8,000")).toBeInTheDocument();
     expect(screen.getByText("4,000")).toBeInTheDocument();
   });
 
   it("記録が無い月は空表示にする", () => {
-    render(<DailyTrendCard entries={[]} month="2026-06" />);
+    render(<DailyTrendCard entries={[]} month="2026-06" stats={[]} />);
 
     expect(
       screen.getByText("この つきの きろくは まだ ない"),
@@ -122,7 +144,7 @@ describe("DailyTrendCard", () => {
   });
 
   it("記録のない日の日付も紺の背景で読める濃さで表示する", () => {
-    render(<DailyTrendCard entries={entries} month="2026-06" />);
+    render(<DailyTrendCard entries={entries} month="2026-06" stats={stats} />);
 
     const day = within(
       screen.getByRole("button", { name: "6/10(水)の収支詳細" }),
