@@ -27,7 +27,7 @@
     }
   ],
   "triggers": {
-    "crons": ["0 15 1 * *", "0 15 5 1 *"]
+    "crons": []
   },
   "vars": {
     "BETTER_AUTH_URL": "https://delivery-ledger.shake1574.workers.dev",
